@@ -1,4 +1,4 @@
-module ForemanPluginTemplate
+module ForemanProbing
   module HostExtensions
     extend ActiveSupport::Concern
 
@@ -9,6 +9,11 @@ module ForemanPluginTemplate
     # create or overwrite instance methods...
     def instance_method_name
     end
+
+    def probe_host(probe_class = ForemanProbingCore::ServiceProbes::TCPOpen)
+      require 'pry'; binding.pry
+    end
+
 
     module ClassMethods
       # create or overwrite class methods...
