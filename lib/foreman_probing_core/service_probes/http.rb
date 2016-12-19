@@ -1,7 +1,7 @@
 module ForemanProbingCore
   module ServiceProbes
 
-    class HTTP < Abstract
+    class HTTP < TCPProbe
 
       COMMON_PORTS = [80]
 
@@ -10,11 +10,13 @@ module ForemanProbingCore
           socket.print(head_data)
           socket.close_write
           response = socket.read
-          result = parse_response(response)
-          result.merge(socket_data(socker))
+          result = parse_response(response).merge(socket_data(socket))
+          @result_builder.host_state('up')
+                         .port_state('tcp', port, 'open', 'http', result)
+                         .result
         end
       rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT => e
-        exception_result(e)
+        @result_builder.exception(e).result
       end
 
       private
@@ -33,8 +35,12 @@ module ForemanProbingCore
         headers = lines.map { |line| line.split(': ', 2) }.reduce({}) do |acc, cur|
           acc.merge(cur.first => cur.last)
         end
-        valid_result(:protocol => protocol, :http_code => code,
-                     :http_status => status, :headers => headers)
+
+        { :http_code => code, :http_status => status, :headers => headers }
+      end
+
+      def socket_data(socket)
+        {}
       end
 
       def head_data

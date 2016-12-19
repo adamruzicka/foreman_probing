@@ -31,9 +31,12 @@ module ForemanProbingCore
 
       private
 
+      def nmap_flags
+        %w(-sn)
+      end
+
       def parse_result(result)
         statistics = result.find { |line| line =~ /^\d+ packets transmitted/ }
-        
       end
 
       def parse_error(result)
@@ -41,27 +44,6 @@ module ForemanProbingCore
         # result.shift.match(/^PING (.*) \((.*?)\) (\d+)\((\d+)\)/)
         # There's some data in $1, $2, $3, $3
         pings = result.take_while { |line| line != "\n" }
-      end
-
-      def exception_result(exception)
-        { :state => :exception,
-          :exception => {
-            :class     => exception.class,
-            :message   => exception.message,
-            :backtrace => exception.backtrace }
-        }
-      end
-
-      def valid_result(data = {})
-        { :state => :valid, :meta => data } 
-      end
-
-      def invalid_result(data = {})
-        { :state => :invalid, :meta => data }
-      end
-
-      def socket_data(socket)
-        { :addr => socket.addr, :peeraddr => socket.peeraddr }
       end
       
     end

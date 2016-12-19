@@ -3,7 +3,7 @@ require 'resolv'
 module ForemanProbingCore
   module ServiceProbes
 
-    class DNS < Abstract
+    class DNS < UDPProbe
 
       COMMON_PORTS = [53]
 
@@ -12,12 +12,15 @@ module ForemanProbingCore
                                    :nameserver_port => [[@host, port]],
                                    :search => [],
                                    :ndots => 1)
-        resolver.timeouts = 1
-        result = resolver.getname('127.0.0.1')
-        valid_result(:port => port)
+        resolver.timeouts = @options.fetch(:timeout, 5)
+        result = resolver.getname(@options.fetch(:target, '127.0.0.1'))
+        @result_builder.host_state('up')
+                       .port_state('udp', port, 'open', 'dns')
+                       .result
       rescue Resolv::ResolvError => e
-        exception_result(e)
+        @result_builder.exception(e).result
       end
+
     end
   end
 end
