@@ -5,6 +5,7 @@ module ForemanProbingCore
     require 'foreman_probing_core/service_probes/dns'
     require 'foreman_probing_core/service_probes/http'
     require 'foreman_probing_core/service_probes/ssh'
+    require 'foreman_probing_core/service_probes/ping'
     require 'foreman_probing_core/service_probes/tcp_open'
 
     ALL_PROBES = [DNS, HTTP, HTTPS, SSH, TCPOpen]

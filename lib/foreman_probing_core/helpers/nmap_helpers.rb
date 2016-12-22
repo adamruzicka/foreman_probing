@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'open3'
 
 module ForemanProbingCore
   module Helpers
@@ -7,17 +8,17 @@ module ForemanProbingCore
       if ForemanProbingCore.can_use_nmap?
 
         def nmap_probe
-          command = ['nmap', nmap_arguments, nmap_flags, @host, with_ports(ports)].flatten
+          command = ['nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, @host.to_s, with_ports(@ports)].flatten
           result = {}
           status = nil
-          Open3.popen3(command) do |_stdin, stdout, stderr, wait_thr|
+          Open3.popen3(*command) do |_stdin, stdout, stderr, wait_thr|
             wait_thr.join
             result[:out] = stdout.read
             result[:err] = stderr.read
             status = wait_thr.value
           end
           @result = if status.success?
-            process_result(xml_to_hash(result[:out]))
+            process_result(xml_to_hash(result[:out]).first)
           else
             parse_error(result[:err])
           end
@@ -33,28 +34,49 @@ module ForemanProbingCore
           %w(-oX -)
         end
 
+        def nmap_ipv6_flag
+          @host.ipv6? ? '-6' : ''
+        end
+
         def process_result(hash)
-          raise NotImplementedError
+          hash
         end
 
         def xml_to_hash(output)
           dom = Nokogiri.parse(output)
           dom.xpath('/nmaprun/host').map do |host|
-            status = reduce_attributes(host.xpath('status').first)
-            address = reduce_attributes(host.xpath('address').first)
-            hostnames = host.xpath('hostnames').map { |hostname| reduce_attributes(hostname) }
+            host.xpath('status').each do |attrs|
+              attrs = reduce_attributes(attrs)
+              state = attrs.delete('state')
+              reason = attrs.delete('reason')
+              result_builder.state(state, reason, attrs)
+            end
+            address = host.xpath('address').each do |hash|
+              attrs = reduce_attributes(hash)
+              addr = attrs.delete('addr')
+              type = attrs.delete('addrtype')
+              result_builder.address(addr, type, attrs)
+            end
+            hostnames = host.xpath('hostnames').each do |hostname|
+              if hostname.attributes.key?('hostname')
+                result_builder.hostname(hostname.attributes['hostname'].value)
+              end
+            end
             ports = host.xpath('ports/port').map do |port|
+              attrs = reduce_attributes(port)
+              protocol = attrs.delete('protocol')
+              portid = attrs.delete('portid')
+
               inner = port.children.reduce({}) do |acc, cur|
                 acc.merge(cur.name => reduce_attributes(cur))
               end
-              reduce_attributes(port).merge(inner)
+
+              service_name = inner['service'].delete('name')
+              state = inner['state'].delete('state')
+              result_builder.port(protocol, portid, state,
+                                  service_name, inner['state'], inner['service'])
             end
-            {
-              :address => address,
-              :status  => status,
-              :hostnames => hostnames,
-              :ports => ports
-            }
+            result_builder.result
           end
         end
 

@@ -14,11 +14,9 @@ module ForemanProbingCore
                                    :ndots => 1)
         resolver.timeouts = @options.fetch(:timeout, 5)
         result = resolver.getname(@options.fetch(:target, '127.0.0.1'))
-        @result_builder.host_state('up')
-                       .port_state('udp', port, 'open', 'dns')
-                       .result
+        @result_builder.host('up').port('udp', port, 'open', 'dns')
       rescue Resolv::ResolvError => e
-        @result_builder.exception(e).result
+        exception_result e
       end
 
     end

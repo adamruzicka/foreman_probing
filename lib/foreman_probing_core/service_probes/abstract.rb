@@ -1,3 +1,5 @@
+require 'ipaddr'
+
 module ForemanProbingCore
   module ServiceProbes
 
@@ -8,38 +10,56 @@ module ForemanProbingCore
       def initialize(host)
         @host = host
         @result = {
-          :address => { "addr" => @host },
-          :status => {},
-          :hostnames => {},
-          :ports = []
+          :address => [],
+          :status => {}, 
+          :hostnames => [],
+          :ports => [],
+          :exceptions => []
         }
+        address(host.to_s, host.ipv4? ? 'ipv4' : 'ipv6')
       end
 
       def exception(exception)
-        status = { :state => :exception,
-          :exception => {
-            :class     => exception.class,
-            :message   => exception.message,
-            :backtrace => exception.backtrace }
+        exception = {
+          :class     => exception.class,
+          :message   => exception.message,
+          :backtrace => exception.backtrace
         }
-        @result[:status].update(:state => status)        
-      end
-
-      def host_state(state, reason = 'probe')
-        @result[:status].update(:state => state, :reason => reason)
+        add_if_missing(:exceptions, exception)
         self
       end
 
-      def port_state(protocol, number, state, service = nil, service_meta = {})
+      def address(addr, type, base = {})
+        entry = base.merge({ :addr => addr, :addrtype => type })
+        add_if_missing(:address, entry)
+        self
+      end
+
+      def state(state, reason = 'probe', base = {})
+        @result[:status].update(base.merge(:state => state, :reason => reason))
+        self
+      end
+
+      def port(protocol, number, state, service = nil, state_opt = {}, service_opt = {})
         data = {
-          'protocol' => protocol,
-          'portid' => number,
-          'state' => { 'state' => state }
+          :protocol => protocol,
+          :portid => number,
+          :state => state_opt.merge({ :state => state })
         }
-        data.update('service' => { 'name' => service, 'meta' => service_meta }) if service
-        @result[:ports] << data
-        @result[:ports].uniq!
+        data.update(:service => service_opt.merge({ :name => service })) if service
+        add_if_missing(:ports, data)
         self
+      end
+
+      def hostname(hostname)
+        add_if_missing(:hostnames, hostname)
+        self
+      end
+
+      private
+
+      def add_if_missing(kind, entry)
+        @result[kind] << entry unless @result[kind].include?(entry)
       end
     end
 
@@ -49,11 +69,13 @@ module ForemanProbingCore
 
       COMMON_PORTS = []
 
+      attr_reader :result_builder
+
       def initialize(host, ports = COMMON_PORTS, options = {})
-        @host    = host
+        @host    = IPAddr.new(host)
         @ports   = ports
         @options = options
-        @result_builder = ResultBuilder.new(host)
+        @result_builder = ResultBuilder.new(@host)
       end
 
       def probe!
@@ -61,6 +83,8 @@ module ForemanProbingCore
           nmap_probe
         else
           probe
+          arp_lookup if @host.ipv4?
+          @result_builder.result
         end
       end
 
@@ -72,8 +96,17 @@ module ForemanProbingCore
 
       private
 
+      def exception_result(exception)
+        @result_builder.exception(exception)
+      end
+
       def arp_lookup
-        # TODO
+        records = `arp #{@host}`.lines.drop(1) # Drop the header
+        records.each do |record|
+          ip, _hwtype, hwaddr, _flags, _iface = record.split(' ')
+          result_builder.address(hwaddr, 'mac')
+          result_builder.hostname(ip) if ip != @host.to_s
+        end
       end
     end
 
@@ -81,6 +114,12 @@ module ForemanProbingCore
       def nmap_flags
         # Use TCP connect scan with service detection
         %w(-sT -sV)
+      end
+
+      def with_open_socket(port)
+        Socket.tcp(@host.to_s, port) do |socket|
+          yield socket if block_given?
+        end
       end
     end
 

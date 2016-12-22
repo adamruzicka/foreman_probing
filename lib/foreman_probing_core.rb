@@ -7,8 +7,20 @@ module ForemanProbingCore
     require 'foreman_tasks_core/runner'
   end
 
-  def nmap_available?
+  def self.can_use_nmap?
+    # TODO:
+    # Settings.nmap_enabled &&
+    nmap_available?
+  end
 
+  def self.nmap_available?
+    # TODO:
+
+    return @nmap_available unless @nmap_available.nil?
+    `nmap`
+    @nmap_available = true
+  rescue Errno::ENOENT
+    @nmap_available = false
   end
 
   require 'foreman_probing_core/helpers'

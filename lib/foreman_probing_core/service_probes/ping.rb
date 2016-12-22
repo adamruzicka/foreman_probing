@@ -3,21 +3,22 @@ require 'open3'
 module ForemanProbingCore
   module ServiceProbes
 
-    class Ping
+    class Ping < Abstract
 
       COMMON_PORTS = []
 
       def initialize(host, options = {})
+        super(host, [], options)
         @host    = host
+        @count   = options.fetch(:count, 4)
         @options = options
       end
 
-      def probe!
-        count = @options.fetch(:count, 4).to_i
-        command = ['ping', '-c', count.to_s, @host]
+      def probe
+        command = ['ping', '-c', @count.to_s, @host]
         result = nil
         status = nil
-        Open3.popen3(command) do |_stdin, stdout, stderr, wait_thr|
+        Open3.popen3(*command) do |_stdin, stdout, stderr, wait_thr|
           wait_thr.join
           result = stdout.readlines
           status = wait_thr.value

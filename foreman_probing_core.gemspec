@@ -20,4 +20,5 @@ Gem::Specification.new do |s|
   # s.add_development_dependency 'rubocop'
   # s.add_development_dependency 'rdoc'
   s.add_dependency('foreman-tasks-core', '~> 0.1.0')
+  s.add_dependency('nokogiri', '~> 1.6.8')
 end

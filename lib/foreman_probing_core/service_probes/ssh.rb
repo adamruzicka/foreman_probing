@@ -10,19 +10,19 @@ module ForemanProbingCore
       IDENT_STRING_REGEXP = /^SSH-(.*?)-(.*?)( (.*))?\r\n/
 
       def probe_port(port)
-        Socket.tcp(@host, port) do |socket|
+        with_open_socket(port) do
           socket.close_write
           response = socket.read
           @result_builder.host_state('up')
           if is_ssh?(response)
             @result_builder.port_state('tcp', port, 'up', 'ssh', parse_response(response))
           else
-            @result_builder,port_state('tcp', port, 'up', 'N/A', :raw_response => response)
+            @result_builder.port_state('tcp', port, 'up', 'N/A', :raw_response => response)
           end
-          @result_builder.result
+          @result_builder
         end
       rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT => e
-        @result_builder.exception(e).result
+        exception_result e
       end
 
       private

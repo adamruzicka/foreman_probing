@@ -11,24 +11,17 @@ module ForemanProbingCore
           socket.close_write
           response = socket.read
           result = parse_response(response).merge(socket_data(socket))
-          @result_builder.host_state('up')
-                         .port_state('tcp', port, 'open', 'http', result)
-                         .result
+          @result_builder.state('up')
+                         .port('tcp', port, 'open', 'http', result)
         end
       rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT => e
-        @result_builder.exception(e).result
+        exception_result(e)
       end
 
       private
 
-      def with_open_socket(port)
-        Socket.tcp(@host, port) do |socket|
-          yield socket
-        end
-      end
-
       def parse_response(response)
-        lines = response.lines
+        lines = response.split("\r\n")
         protocol, code, status = lines.shift.split(' ', 3)
         return invalid_response(response) unless protocol =~ /^HTTP/
 
