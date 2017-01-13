@@ -2,25 +2,24 @@ module ForemanProbingCore
   module Actions
     class UseProbe < ::Dynflow::Action
       
-      def plan(host, probe_class, probe_overrides = nil)
-        ports = probe_overrides.nil? ? probe_class::COMMON_PORTS : probe_overrides
-        plas_self :host => host, :ports => ports, :probe_class => probe_class
-      end
-
-      def run
-        probe = input[:probe].constantize.new(input[:host], ports)
-        output[:result] = probe.probe!
-      end
-
-      def finalize
-        if output[:result][:state] != :valid
-          raise "Probe failed"
+      def plan(targets, probe_class, ports, options = {})
+        scan = plan_self(:targets => targets.map(&:to_s), :probe_class => probe_class.to_s,
+                         :ports => ports, :options => options)
+        targets.each do |target|
+          plan_action(::ForemanProbingCore::Actions::ImportHostFacts, target.to_s, scan.output)
         end
       end
 
-      def rescue_strategy_for_self
-        Skip
+      def run
+        output[:facts] = input[:targets].map do |target|
+          probe = input[:probe_class].constantize.new(target, input[:ports], input[:options])
+          probe.probe!
+        end
       end
+
+      # def rescue_strategy_for_self
+      #   Skip
+      # end
       
     end
   end

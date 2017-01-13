@@ -1,0 +1,20 @@
+module ForemanProbing
+  class FactParser < ::FactParser
+    attr_reader :facts
+
+    def initialize(facts)
+      @facts = HashWithIndifferentAccess.new(facts[:ansible_facts])
+    end
+
+    def operatingsystem; end
+    def environment; end
+    def architecture; end
+    def model; end
+    def domain; end # ?
+
+    def support_interfaces_parsing?
+      false
+    end
+
+  end
+end

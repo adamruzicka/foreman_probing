@@ -3,7 +3,17 @@ module ForemanProbingCore
 
     class SSH < TCPProbe
 
+      include Helpers::ServiceProbeHelper
+
       COMMON_PORTS = [22]
+
+      def self.service_name
+        'ssh'
+      end
+
+      def self.humanized_service_name
+        'SSH'
+      end
 
       # RFC4253, section 4.2: Protocol Version Exchange
       # https://tools.ietf.org/html/rfc4253

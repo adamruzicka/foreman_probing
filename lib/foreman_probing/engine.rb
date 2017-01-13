@@ -1,4 +1,4 @@
-require 'deface'
+# require 'deface'
 
 module ForemanProbing
   class Engine < ::Rails::Engine
@@ -8,6 +8,9 @@ module ForemanProbing
     config.autoload_paths += Dir["#{config.root}/app/helpers/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/models/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/overrides"]
+    config.autoload_paths += Dir["#{config.root}/app/services"]
+    config.autoload_paths += Dir["#{config.root}/app/lib/"]
+
 
     # Add any db migrations
     initializer 'foreman_probing.load_app_instance_data' do |app|
@@ -29,11 +32,11 @@ module ForemanProbing
         role 'ForemanProbing', [:view_foreman_probing]
 
         # add menu entry
-        menu :top_menu, :template,
-             url_hash: { controller: :'foreman_probing/hosts', action: :new_action },
-             caption: 'ForemanProbing',
-             parent: :hosts_menu,
-             after: :hosts
+        # menu :top_menu, :template,
+        #      url_hash: { controller: :'foreman_probing/hosts', action: :new_action },
+        #      caption: 'ForemanProbing',
+        #      parent: :hosts_menu,
+        #      after: :hosts
 
         # add dashboard widget
         widget 'foreman_probing_widget', name: N_('Foreman plugin template widget'), sizex: 4, sizey: 1
@@ -59,8 +62,14 @@ module ForemanProbing
     # Include concerns in this config.to_prepare block
     config.to_prepare do
       begin
-        Host::Managed.send(:include, ForemanProbing::HostExtensions)
-        HostsHelper.send(:include, ForemanProbing::HostsHelperExtensions)
+        # Host::Managed.send(:include, ForemanProbing::HostExtensions)
+        # HostsHelper.send(:include, ForemanProbing::HostsHelperExtensions)
+
+        ::FactImporter.register_fact_importer(
+          :foreman_probing,
+          ForemanProbing::StructuredFactImporter
+        )
+        ::FactParser.register_fact_parser(:foreman_probing, ForemanProbing::FactParser)
       rescue => e
         Rails.logger.warn "ForemanProbing: skipping engine hook (#{e})"
       end
@@ -80,6 +89,7 @@ module ForemanProbing
 
     initializer 'foreman_probing.require_dynflow', :before => 'foreman_tasks.initialize_dynflow' do |app|
       ForemanTasks.dynflow.require!
+      ForemanTasks.dynflow.config.eager_load_paths << File.join(ForemanProbing::Engine.root, 'app/lib/actions')
       ForemanTasks.dynflow.config.eager_load_paths << File.join(ForemanProbing::Engine.root, 'app/lib/actions')
     end
   end

@@ -11,7 +11,6 @@ module ForemanProbing
     end
 
     def probe_host(probe_class = ForemanProbingCore::ServiceProbes::TCPOpen)
-      require 'pry'; binding.pry
     end
 
 

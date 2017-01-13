@@ -10,14 +10,15 @@ module ForemanProbing
 
     # create or overwrite instance methods...
     def all_addresses
-      network = ipaddr
-      results = []
-      addr = ipaddr.succ
-      while network.include? addr
-        results << addr
-        addr = addr.succ
-      end
-      results
+      ipaddr.to_range
+    end
+
+    def first_address
+      ipaddr.succ
+    end
+
+    def last_address
+
     end
 
     module ClassMethods

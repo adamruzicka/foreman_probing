@@ -5,10 +5,10 @@ module ForemanProbingCore
   module Helpers
     module NmapHelper
 
-      if ForemanProbingCore.can_use_nmap?
+      if ForemanProbingCore.use_nmap?
 
         def nmap_probe
-          command = ['nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, @host.to_s, with_ports(@ports)].flatten
+          command = ['nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
           result = {}
           status = nil
           Open3.popen3(*command) do |_stdin, stdout, stderr, wait_thr|
@@ -17,7 +17,7 @@ module ForemanProbingCore
             result[:err] = stderr.read
             status = wait_thr.value
           end
-          @result = if status.success?
+          if status.success?
             process_result(xml_to_hash(result[:out]).first)
           else
             parse_error(result[:err])
@@ -25,6 +25,10 @@ module ForemanProbingCore
         end
 
         private
+
+        def hosts
+          @hosts.map(&:to_s)
+        end
 
         def nmap_flags 
           raise NotImplementedError
@@ -35,7 +39,7 @@ module ForemanProbingCore
         end
 
         def nmap_ipv6_flag
-          @host.ipv6? ? '-6' : ''
+          @hosts.first.ipv6? ? '-6' : ''
         end
 
         def process_result(hash)

@@ -10,6 +10,7 @@ module ForemanProbingCore
       def initialize(host)
         @host = host
         @result = {
+          :_type => :foreman_probing,
           :address => [],
           :status => {}, 
           :hostnames => [],
@@ -71,26 +72,46 @@ module ForemanProbingCore
 
       attr_reader :result_builder
 
-      def initialize(host, ports = COMMON_PORTS, options = {})
-        @host    = IPAddr.new(host)
-        @ports   = ports
+      def self.scan_type
+        raise NotImplementedError
+      end
+
+      def self.humanized_scan_type
+        raise NotImplementedError
+      end
+
+      def self.service_name
+        self.to_s.downcase
+      end
+
+      def self.humanized_service_name
+        self.to_s
+      end
+
+      def initialize(hosts, ports = COMMON_PORTS, options = {})
+        hosts = [hosts] unless hosts.kind_of?(Array)
+        @hosts   = hosts.map { |host| IPAddr.new(host) }
+        @ports   = ports.kind_of?(Array) ? ports : [ports]
         @options = options
-        @result_builder = ResultBuilder.new(@host)
       end
 
       def probe!
         if self.respond_to?(:nmap_probe)
+          @result_builder = ResultBuilder.new(@hosts.first)
           nmap_probe
         else
           probe
-          arp_lookup if @host.ipv4?
-          @result_builder.result
         end
       end
 
       def probe
-        @result = @ports.reduce({}) do |acc, port|
-          acc.merge(port => probe_port(port))
+        @hosts.map do |host|
+          @result_builder = ResultBuilder.new(host)
+          @ports.each do |port|
+            probe_port(port)
+          end
+          arp_lookup if host.ipv4?
+          @result_builder.result
         end
       end
 
@@ -111,6 +132,15 @@ module ForemanProbingCore
     end
 
     class TCPProbe < Abstract
+
+      def self.scan_type
+        'tcp'
+      end
+
+      def self.humanized_scan_type
+        _('TCP')
+      end
+
       def nmap_flags
         # Use TCP connect scan with service detection
         %w(-sT -sV)
@@ -124,6 +154,15 @@ module ForemanProbingCore
     end
 
     class UDPProbe < Abstract
+
+      def self.scan_type
+        'udp'
+      end
+
+      def self.humanized_scan_type
+        _('UDP')
+      end
+
       def nmap_flags
         # Use UDP scan with service detection
         %w(-sU -sV)

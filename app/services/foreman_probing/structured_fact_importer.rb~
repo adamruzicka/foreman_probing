@@ -1,0 +1,20 @@
+module ForemanProbing
+  class StructuredFactImporter < ::StructuredFactImporter
+    def fact_name_class
+      ForemanProbing::FactName
+    end
+
+    def initialize(host, facts = {})
+      @host = fallback
+      @facts = normalize(facts[:foreman_probing_facts])
+      @counters = {}
+    end
+
+    private
+    
+    def find_host(fallback, facts)
+      # TODO: go through facts
+      fallback
+    end
+  end
+end

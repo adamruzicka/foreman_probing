@@ -6,8 +6,9 @@ module ForemanProbingCore
   if ForemanTasksCore.dynflow_present?
     require 'foreman_tasks_core/runner'
   end
+  require 'foreman_probing_core/actions'
 
-  def self.can_use_nmap?
+  def self.use_nmap?
     # TODO:
     # Settings.nmap_enabled &&
     nmap_available?
