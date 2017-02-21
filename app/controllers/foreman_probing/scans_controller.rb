@@ -17,7 +17,8 @@ module ForemanProbing
                              composer.targeting.targets,
                              composer.probe,
                              composer.ports
-                             )
+                            )
+      # TODO: Redirect to found hosts
     end
 
   end

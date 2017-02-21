@@ -1,7 +1,7 @@
 module ForemanProbingCore
   module Actions
     class UseProbe < ::Dynflow::Action
-      
+
       def plan(targets, probe_class, ports, options = {})
         scan = plan_self(:targets => targets.map(&:to_s), :probe_class => probe_class.to_s,
                          :ports => ports, :options => options)
@@ -11,16 +11,17 @@ module ForemanProbingCore
       end
 
       def run
-        output[:facts] = input[:targets].map do |target|
-          probe = input[:probe_class].constantize.new(target, input[:ports], input[:options])
-          probe.probe!
-        end
+        probe = input[:service].constantize.new(input[:targets],
+                                                ports,
+                                                input[:options])
+        probe.probe!
+        output[:facts] = probe.result
       end
 
       # def rescue_strategy_for_self
       #   Skip
       # end
-      
+
     end
   end
 end
