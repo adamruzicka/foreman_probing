@@ -13,18 +13,19 @@ module ForemanProbing
 
     def probe_from_params(params)
       case params[:scan_type].downcase
-      when 'tcp'
-        case params[:tcp][:scan_options]
-        when 'detect'
-          ForemanProbingCore::ServiceProbes::ALL_PROBES.find do |probe|
-            probe.scan_type == 'tcp' &&
-              probe.service_name == params[:tcp][:service].downcase
-          end
-        when 'discover'
-          ForemanProbingCore::ServiceProbes::TCPDiscover
-        when 'open'
-          ForemanProbingCore::ServiceProbes::TCPOpen
-        end
+    when 'tcp'
+        ForemanProbingCore::Probes::TCPProbe
+        # case params[:tcp][:scan_options]
+        # when 'detect'
+        #   ForemanProbingCore::ServiceProbes::ALL_PROBES.find do |probe|
+        #     probe.scan_type == 'tcp' &&
+        #       probe.service_name == params[:tcp][:service].downcase
+        #   end
+        # when 'discover'
+        #   ForemanProbingCore::ServiceProbes::TCPDiscover
+        # when 'open'
+        #   ForemanProbingCore::ServiceProbes::TCPOpen
+        # end
       when 'udp'
         raise NotImplementedError
       when 'icmp'

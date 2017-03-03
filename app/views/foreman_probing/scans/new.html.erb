@@ -24,14 +24,6 @@
 
   <%= selectable_f f, :scan_type, @scan.available_scan_types, {}, :label => _('Scan type') %>
   
-  <%= f.fields_for :tcp do |tcp_f| %>
-    <div class="type-tcp">
-    <%= selectable_f tcp_f, :scan_options, @scan.available_tcp_scan_options, {}, :label => _('TCP Scan Options') %>
-  
-    <%= selectable_f tcp_f, :service, @scan.known_tcp_services, {}, :label => _('Service detection') %>
-    </div>
-  <% end %>
-
   <%= f.fields_for :udp do |udp_f| %>
   <div class="type-udp hidden">
     <div class="col-md-4">
@@ -47,10 +39,6 @@
   <% end %>
   
   <%= text_f f, :ports, :label => _('Ports'), :help_inline => 'Single, port, coma-separated list or range FROM-TO' %>
-
-  <div class="<%= ForemanProbingCore.nmap_available? ? '' : 'disabled' %> ">
-  <%= checkbox_f f, :use_nmap, :label => _('Use NMAP') %>
-  </div>
 
   <%= submit_or_cancel f, false, :cancel_path => foreman_probing_scans_path %>
 

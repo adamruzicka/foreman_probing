@@ -1,3 +1,4 @@
+require 'dynflow'
 require 'foreman_tasks_core'
 
 module ForemanProbingCore
@@ -25,7 +26,7 @@ module ForemanProbingCore
   end
 
   require 'foreman_probing_core/helpers'
-  require 'foreman_probing_core/service_probes'
+  require 'foreman_probing_core/probes'
 
   require 'foreman_probing_core/version'
 

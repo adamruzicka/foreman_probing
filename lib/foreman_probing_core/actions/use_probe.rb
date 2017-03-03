@@ -11,9 +11,9 @@ module ForemanProbingCore
       end
 
       def run
-        probe = input[:service].constantize.new(input[:targets],
-                                                ports,
-                                                input[:options])
+        probe = input[:probe_class].constantize.new(input[:targets],
+                                                    input[:ports],
+                                                    input[:options])
         probe.probe!
         output[:facts] = probe.result
       end
