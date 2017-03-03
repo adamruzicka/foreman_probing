@@ -78,35 +78,17 @@ module ForemanProbingCore
       end
 
       def lookup_addresses(addresses)
-        macs = addresses.map do |address|
-          mac_lookup(address[:addr])
-        end
-        addresses + macs.flatten.map { |mac| { :type => 'hwaddr', :addr => mac, :vendor => nil } }
-      end
-
-      def mac_lookup(ip)
-        generate_cache! if @arp_cache.nil?
-        @arp_cache.select { |record| record[:ip] == ip }.map { |record| record['lladdr'] }
-      end
-
-      def ip_lookup(mac)
-        generate_cache! if @arp_cache.nil?
-        @arp_cache.select { |record| record['lladdr'] == mac }.map { |record| record[:ip] }
-      end
-
-      def generate_cache!
-        @arp_cache = `ip neigh show`.lines.map do |line|
-          fields = line.chomp.split(/\s+/)
-          hash = { :ip => fields.shift }
-          fields.each_slice(2) do |k, v|
-            if v
-              hash[k] = v
-            else
-              hash[:state] = k
-            end
+        @neighbour_cache ||= ForemanProbingCore::NeighbourCache.new.tap(&:cache!)
+        ips = addresses.map { |address| address[:addr] }
+        macs = ips.map do |ip|
+          @neighbour_cache.mac_for_ip(ip)
+        end.compact
+        new_ips = macs.map do |mac|
+          @neighbour_cache.ips_for_mac(mac).select { |ip| !ips.include? ip }.map do |ip|
+            { :type => IPAddr.new(ip).ipv4? ? 'ipv4' : 'ipv6', :addr => ip, :vendor => nil }
           end
-          hash
         end
+        addresses + new_ips.flatten + macs.flatten.map { |mac| { :type => 'hwaddr', :addr => mac, :vendor => nil } }
       end
     end
   end
