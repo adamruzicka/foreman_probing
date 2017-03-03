@@ -1,5 +1,5 @@
-require 'nokogiri'
 require 'open3'
+require 'nmap/xml'
 
 module ForemanProbingCore
   module Helpers
@@ -46,47 +46,30 @@ module ForemanProbingCore
       end
 
       def xml_to_hash(output)
-        dom = Nokogiri.parse(output)
-        dom.xpath('/nmaprun/host').map do |host|
-          result_builder = ResultBuilder.new(host)
-          host.xpath('status').each do |attrs|
-            attrs = reduce_attributes(attrs)
-            state = attrs.delete('state')
-            reason = attrs.delete('reason')
-            result_builder.state(state, reason, attrs)
-          end
-          address = host.xpath('address').each do |hash|
-            attrs = reduce_attributes(hash)
-            addr = attrs.delete('addr')
-            type = attrs.delete('addrtype')
-            result_builder.address(addr, type, attrs)
-          end
-          hostnames = host.xpath('hostnames').each do |hostname|
-            if hostname.attributes.key?('hostname')
-              result_builder.hostname(hostname.attributes['hostname'].value)
+        xml = ::Nmap::XML.parse(output)
+        xml.hosts.map do |host|
+          ports = host.ports.map do |port|
+            service = %w(extra_info fingerprint hostname name protocol version).reduce({}) do |acc, key|
+              acc.merge(key => port.service.public_send(key.to_sym))
             end
+            service[:ssl] = port.service.ssl?
+            service[:method] = port.service.fingerprint_method
+            port = {
+              :service => service,
+              :number => port.number,
+              :protocol => port.protocol,
+              :state => port.state,
+              :reason => port.reason
+            }
           end
-          ports = host.xpath('ports/port').map do |port|
-            attrs = reduce_attributes(port)
-            protocol = attrs.delete('protocol')
-            portid = attrs.delete('portid')
-
-            inner = port.children.reduce({}) do |acc, cur|
-              acc.merge(cur.name => reduce_attributes(cur))
-            end
-
-            service_name = inner['service'].delete('name')
-            state = inner['state'].delete('state')
-            result_builder.port(protocol, portid, state,
-            service_name, inner['state'], inner['service'])
-          end
-          arp_lookup(host, result_builder)
-          result_builder.result
+          {
+            :_type => :foreman_probing,
+            :addresses => lookup_addresses(host.addresses.map(&:to_h)),
+            :hostnames => host.hostnames.map(&:to_h),
+            :ports     => ports,
+            :status    => host.status.to_h
+          }
         end
-      end
-
-      def reduce_attributes(dom)
-        Hash[dom.keys.zip(dom.values)]
       end
 
       def with_ports(ports)
@@ -94,12 +77,35 @@ module ForemanProbingCore
         "-p #{ports.join(',')}"
       end
 
-      def arp_lookup(host, builder)
-        records = `arp #{host}`.lines.drop(1) # Drop the header
-        records.each do |record|
-          ip, _hwtype, hwaddr, _flags, _iface = record.split(' ')
-          result_builder.address(hwaddr, 'mac')
-          result_builder.hostname(ip) if ip != host.to_s
+      def lookup_addresses(addresses)
+        macs = addresses.map do |address|
+          mac_lookup(address[:addr])
+        end
+        addresses + macs.flatten.map { |mac| { :type => 'hwaddr', :addr => mac, :vendor => nil } }
+      end
+
+      def mac_lookup(ip)
+        generate_cache! if @arp_cache.nil?
+        @arp_cache.select { |record| record[:ip] == ip }.map { |record| record['lladdr'] }
+      end
+
+      def ip_lookup(mac)
+        generate_cache! if @arp_cache.nil?
+        @arp_cache.select { |record| record['lladdr'] == mac }.map { |record| record[:ip] }
+      end
+
+      def generate_cache!
+        @arp_cache = `ip neigh show`.lines.map do |line|
+          fields = line.chomp.split(/\s+/)
+          hash = { :ip => fields.shift }
+          fields.each_slice(2) do |k, v|
+            if v
+              hash[k] = v
+            else
+              hash[:state] = k
+            end
+          end
+          hash
         end
       end
     end

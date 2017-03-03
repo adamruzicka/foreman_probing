@@ -29,7 +29,7 @@ module ForemanProbingCore
 
       def host_facts(ip, facts)
         facts.find do |fact|
-          fact[:address].map { |h| h[:addr] }.include? ip
+          fact[:addresses].map { |h| h[:addr] }.include? ip
         end || {}
       end
 

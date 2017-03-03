@@ -14,8 +14,7 @@ module ForemanProbingCore
         probe = input[:probe_class].constantize.new(input[:targets],
                                                     input[:ports],
                                                     input[:options])
-        probe.probe!
-        output[:facts] = probe.result
+        output[:facts] = probe.probe!
       end
 
       # def rescue_strategy_for_self
