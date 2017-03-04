@@ -32,11 +32,11 @@ module ForemanProbing
         role 'ForemanProbing', [:view_foreman_probing]
 
         # add menu entry
-        # menu :top_menu, :template,
-        #      url_hash: { controller: :'foreman_probing/hosts', action: :new_action },
-        #      caption: 'ForemanProbing',
-        #      parent: :hosts_menu,
-        #      after: :hosts
+        menu :top_menu, :template,
+             url_hash: { controller: :'foreman_probing/scans', action: :new },
+             caption: _('Scan Network'),
+             parent: :hosts_menu,
+             after: :newhost
 
         # add dashboard widget
         widget 'foreman_probing_widget', name: N_('Foreman plugin template widget'), sizex: 4, sizey: 1
