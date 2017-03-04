@@ -17,6 +17,8 @@ module ForemanProbingCore
             state          = host.import_facts(facts)
             output[:state] = state
           end
+          output[:host_id] = host.id
+          output[:hostname] = hostname
         end
       rescue ::Foreman::Exception => e
         # This error is what is thrown by Host#ImportHostAndFacts when
