@@ -1,12 +1,6 @@
 module ForemanProbing
   class ScansController < ::ApplicationController
 
-    def index
-    end
-
-    def show
-    end
-
     def new
       @scan = ForemanProbing::Scan.new
     end

@@ -17,7 +17,7 @@ module ForemanProbingCore
         if status.success?
           process_result(xml_to_hash(result[:out]))
         else
-          parse_error(result[:err])
+          raise result[:err]
         end
       end
 
@@ -48,23 +48,25 @@ module ForemanProbingCore
       def xml_to_hash(output)
         xml = ::Nmap::XML.parse(output)
         xml.hosts.map do |host|
-          ports = host.ports.map do |port|
-            service = %w(extra_info fingerprint hostname name protocol version).reduce({}) do |acc, key|
+          ports = host.ports.reduce({}) do |acc, port|
+            service = %w(confidence extra_info fingerprint hostname protocol product version).reduce({}) do |acc, key|
               acc.merge(key => port.service.public_send(key.to_sym))
             end
             service[:ssl] = port.service.ssl?
             service[:method] = port.service.fingerprint_method
-            port = {
-              :service => service,
-              :number => port.number,
-              :protocol => port.protocol,
-              :state => port.state,
-              :reason => port.reason
+            record = {
+              port.number =>
+              {
+                :service => { port.service.name => service },
+                :state => port.state,
+                :reason => port.reason
+              }
             }
+            acc.merge(port.protocol => acc.fetch(port.protocol, {}).merge(record))
           end
           {
             :_type => :foreman_probing,
-            :addresses => lookup_addresses(host.addresses.map(&:to_h)),
+            :addresses => factify_addresses(lookup_addresses(host.addresses.map(&:to_h))),
             :hostnames => host.hostnames.map(&:to_h),
             :ports     => ports,
             :status    => host.status.to_h
@@ -73,8 +75,16 @@ module ForemanProbingCore
       end
 
       def with_ports(ports)
-        return '' if ports.empty?
+        return '' if ports.empty? || nmap_flags.include?("-sn")
         "-p #{ports.join(',')}"
+      end
+
+      def factify_addresses(addresses)
+        addresses.reduce({}) do |acc, address|
+          type = address.delete(:type)
+          addr = address.delete(:addr)
+          acc.update(type => { addr => address })
+        end
       end
 
       def lookup_addresses(addresses)

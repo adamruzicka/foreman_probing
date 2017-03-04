@@ -22,7 +22,7 @@ module ForemanProbing
     def ipmi_interface; end
 
     def get_interfaces # rubocop:disable Style/AccessorMethodName
-      count = facts[:addresses].select { |addr| addr["type"] != "hwaddr" }.count
+      count = [4,6].reduce(:+) { |_, i| facts[:addresses].fetch("ipv#{i}", {}).keys.count }
       (0..count - 1).map { |i| "unknown#{i}" }
     end
 

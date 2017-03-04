@@ -38,7 +38,7 @@ module ForemanProbingCore
       end
     end
 
-    class TCPProbe < Abstract
+    class TCP < Abstract
       def self.scan_type
         'tcp'
       end
@@ -53,7 +53,7 @@ module ForemanProbingCore
       end
     end
 
-    class UDPProbe < Abstract
+    class UDP < Abstract
       def self.scan_type
         'udp'
       end
@@ -68,5 +68,18 @@ module ForemanProbingCore
       end
     end
 
+    class ICMP < Abstract
+      def self.scan_type
+        'icmp'
+      end
+
+      def self.humanized_scan_type
+        'ICMP'
+      end
+
+      def nmap_flags
+        %w(-sn)
+      end
+    end
   end
 end
