@@ -10,15 +10,13 @@ module ForemanProbingCore
         facts = host_facts(input[:target], input[:facts])
         # If we're not scanning an already existing host and it is down, we don't want to import it to Foreman
         unless (input[:host_id].nil? && facts.fetch(:status, {})[:state] == 'down')
-          hostname = determine_hostname(facts, input[:target])
-          host = Host::Managed.import_host(hostname,
-                                           :foreman_probing)
+          host = determine_host(facts)
           ::User.as :admin do
             state          = host.import_facts(facts)
             output[:state] = state
           end
           output[:host_id] = host.id
-          output[:hostname] = hostname
+          output[:hostname] = host.name
         end
       rescue ::Foreman::Exception => e
         # This error is what is thrown by Host#ImportHostAndFacts when
@@ -33,6 +31,15 @@ module ForemanProbingCore
         facts.find do |fact|
           fact[:addresses].values.map(&:keys).flatten.include? ip
         end || {}
+      end
+
+      def determine_host(facts)
+        macs = facts[:addresses].fetch(:hwaddr, {}).keys
+        unless macs.empty?
+          ifaces = ::Nic::Managed.w5here(:mac => macs)
+          return ifaces.first.host unless ifaces.empty?
+        end
+        Host::Managed.import_host(determine_hostname(facts, input[:target]), :foreman_probing)
       end
 
       def determine_hostname(facts, fallback)
