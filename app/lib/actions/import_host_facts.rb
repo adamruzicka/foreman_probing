@@ -1,5 +1,5 @@
-module ForemanProbingCore
-  module Actions
+module Actions
+  module ForemanProbing
     class ImportHostFacts < ::Dynflow::Action
 
       def plan(target, scan)
@@ -14,6 +14,7 @@ module ForemanProbingCore
           ::User.as :admin do
             state          = host.import_facts(facts)
             output[:state] = state
+            output[:facts] = facts
           end
           output[:host_id] = host.id
           output[:hostname] = host.name

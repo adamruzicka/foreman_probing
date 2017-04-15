@@ -2,6 +2,8 @@ module ForemanProbing
   module Targeting
     class Abstract
 
+      # belongs_to :run_through_proxy
+
       def targets
         raise NotImplementedError
       end

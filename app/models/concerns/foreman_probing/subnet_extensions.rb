@@ -4,20 +4,11 @@ module ForemanProbing
 
     included do
       # execute callbacks
+      has_many :probing_proxies, :dependent => :destroy
     end
-
-    def 
 
     # create or overwrite instance methods...
-    def all_addresses
-      ipaddr.to_range
-    end
-
-    def first_address
-      ipaddr.succ
-    end
-
-    def last_address
+    def probe!(probe)
 
     end
 
