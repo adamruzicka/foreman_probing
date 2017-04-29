@@ -10,11 +10,13 @@ module Actions
         targets = targets.map(&:to_s)
         scan = plan_delegated_action(proxy, ForemanProbingCore::Actions::UseProbe,
                               :targets => targets,
-                              :probe_class => probe_class.to_s,
-                              :ports => ports, :options => options)
+                                     :probe_class => probe_class.to_s,
+                                     :ports => ports, :options => options)
         targets.each do |target|
-          parsed_scan = plan_action(::Actions::ForemanProbing::ImportHostFacts, target, scan.output)
-          plan_action(::Actions::ForemanProbing::UpdateProbingFacet, parsed_scan)
+          sequence do
+            parsed_scan = plan_action(::Actions::ForemanProbing::ImportHostFacts, target, scan.output)
+            plan_action(::Actions::ForemanProbing::UpdateProbingFacet, parsed_scan.output)
+          end
         end
       end
     end

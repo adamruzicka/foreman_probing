@@ -75,6 +75,16 @@ module ForemanProbing
       end
     end
 
+    config.to_prepare do
+      Facets.register(ForemanProbing::ProbingFacet) do
+        # extend_model PuppetHostExtensions
+        # add_helper PuppetFacetHelper
+        # add_tabs :puppet_tabs
+        # api_view :list => 'api/v2/puppet_facets/base', :single => 'api/v2/puppet_facets/single_host_view'
+        # template_compatibility_properties :environment_id, :puppet_proxy_id, :puppet_ca_proxy_id
+      end
+    end
+
     rake_tasks do
       Rake::Task['db:seed'].enhance do
         ForemanProbing::Engine.load_seed
@@ -92,5 +102,13 @@ module ForemanProbing
       ForemanTasks.dynflow.config.eager_load_paths << File.join(ForemanProbing::Engine.root, 'app/lib/actions')
       ForemanTasks.dynflow.config.eager_load_paths << File.join(ForemanProbing::Engine.root, 'app/lib/actions')
     end
+  end
+
+  def self.table_name_prefix
+    'foreman_probing_'
+  end
+
+  def use_relative_model_naming
+    true
   end
 end

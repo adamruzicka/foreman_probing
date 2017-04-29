@@ -1,5 +1,9 @@
 module ForemanProbing
-  class Scan < ActiveRecord::Model
+  class Scan
+
+    include ActiveModel::Validations
+    include ActiveModel::Conversion
+    extend ActiveModel::Naming
 
     attr_accessor :scan_type, :target_kind
 
@@ -32,6 +36,10 @@ module ForemanProbing
 
     def icmp_scan_types
       ['ping']
+    end
+
+    def persisted?
+      false
     end
   end
 end
