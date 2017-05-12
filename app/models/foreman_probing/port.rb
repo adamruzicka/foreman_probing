@@ -8,6 +8,19 @@ module ForemanProbing
       port.protocol = protocol
       port.number = number
       port.state = facts[:state]
+      port.services = facts["service"].map do |name, hash|
+        Service.new_from_hash(name, hash)
+      end
+      port
+    end
+
+    def update_from_port(port)
+      protocol = port.protocol
+      number = port.number
+      state = port.state
+      port.services.reject { |service| self.services.map(&:name).include? service.name }.each do |service|
+        self.services << service
+      end
     end
   end
 end

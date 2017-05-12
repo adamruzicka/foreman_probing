@@ -5,7 +5,7 @@ module Actions
       def plan(target, scan)
         plan_self(:target => target, :facts => scan[:facts])
       end
-      
+
       def run
         facts = host_facts(input[:target], input[:facts])
         # If we're not scanning an already existing host and it is down, we don't want to import it to Foreman
@@ -37,7 +37,7 @@ module Actions
       def determine_host(facts)
         macs = facts[:addresses].fetch(:hwaddr, {}).keys
         unless macs.empty?
-          ifaces = ::Nic::Managed.w5here(:mac => macs)
+          ifaces = ::Nic::Managed.where(:mac => macs)
           return ifaces.first.host unless ifaces.empty?
         end
         Host::Managed.import_host(determine_hostname(facts, input[:target]), :foreman_probing)
