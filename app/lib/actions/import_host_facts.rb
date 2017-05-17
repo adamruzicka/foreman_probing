@@ -2,14 +2,10 @@ module Actions
   module ForemanProbing
     class ImportHostFacts < ::Dynflow::Action
 
-      def plan(target, scan)
-        plan_self(:target => target, :facts => scan[:facts])
-      end
-
       def run
-        facts = host_facts(input[:target], input[:facts])
+        facts = input[:facts]
         # If we're not scanning an already existing host and it is down, we don't want to import it to Foreman
-        unless (input[:host_id].nil? && facts.fetch(:status, {})[:state] == 'down')
+        unless (input[:options][:host_id].nil? && facts.fetch(:status, {})[:state] == 'down')
           host = determine_host(facts)
           ::User.as :admin do
             state          = host.import_facts(facts)
@@ -27,12 +23,6 @@ module Actions
       end
 
       private
-
-      def host_facts(ip, facts)
-        facts.find do |fact|
-          fact[:addresses].values.map(&:keys).flatten.include? ip
-        end || {}
-      end
 
       def determine_host(facts)
         macs = facts[:addresses].fetch(:hwaddr, {}).keys

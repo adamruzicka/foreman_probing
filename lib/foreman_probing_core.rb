@@ -28,6 +28,7 @@ module ForemanProbingCore
   require 'foreman_probing_core/neighbour_cache'
   require 'foreman_probing_core/helpers'
   require 'foreman_probing_core/probes'
+  require 'foreman_probing_core/targeting'
 
   require 'foreman_probing_core/version'
 

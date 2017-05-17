@@ -3,7 +3,8 @@ module ForemanProbingCore
     class UseProbe < ::Dynflow::Action
 
       def run
-        probe = input[:probe_class].constantize.new(input[:targets],
+        targeting = input[:targeting][:class].constantize.new(input[:targeting])
+        probe = input[:probe_class].constantize.new(targeting.targets,
                                                     input[:ports],
                                                     input[:options])
         output[:facts] = probe.probe!
