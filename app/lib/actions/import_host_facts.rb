@@ -3,7 +3,7 @@ module Actions
     class ImportHostFacts < ::Dynflow::Action
 
       def run
-        facts = input[:facts]
+        facts = facts_for_host(input[:target], input[:scan][:facts])
         # If we're not scanning an already existing host and it is down, we don't want to import it to Foreman
         unless (input[:options][:host_id].nil? && facts.fetch(:status, {})[:state] == 'down')
           host = determine_host(facts)
@@ -23,6 +23,12 @@ module Actions
       end
 
       private
+
+      def facts_for_host(target, facts)
+        facts.find do |fact|
+          fact[:addresses].values.map(&:keys).flatten.include? target
+        end || {}
+      end
 
       def determine_host(facts)
         macs = facts[:addresses].fetch(:hwaddr, {}).keys

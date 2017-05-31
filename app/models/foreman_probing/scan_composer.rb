@@ -35,7 +35,7 @@ module ForemanProbing
     def targeting_from_params(params)
       case params[:target_kind].downcase
       when 'direct'
-        ::ForemanProbingCore::Targeting::Direct.new(*params[:direct].values_at(:ip, :netmask))
+        ::ForemanProbingCore::Targeting::Direct.new(params[:direct][:ip])
       when 'subnet'
         ::ForemanProbingCore::Targeting::Subnet.new(params[:subnet][:id])
       when 'host'

@@ -7,6 +7,7 @@ module ForemanProbingCore
         raise NotImplementedError
       end
 
+      # 
       def enumerate_targets
         targets
       end
@@ -24,17 +25,17 @@ module ForemanProbingCore
 
       # Either ip address or subnet in CIDR notation
       def initialize(address_string)
-        @addressses = parse_address_string!(address_string)
+        @addresses = parse_address_string!(address_string)
       end
 
       def targets
         @addresses.map do |addr|
           str = ''
-          case addr[:family]
-          when :inet
+          case addr[:family].to_s
+          when 'inet'
             str += addr[:addr]
             str += '/' + addr[:netmask] unless addr[:netmask].nil?
-          when :inet6
+          when 'inet6'
             # TODO: ipv6
             raise NotImplementedError
           else
@@ -68,6 +69,7 @@ module ForemanProbingCore
         elsif str.is_a? Hash
           str
         else
+          require 'pry'; binding.pry
           str.split(',').map do |ip|
             if ip =~ /(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})(\/(\d{1,2}))?/
               { :family => :inet, :addr => $1, :netmask => $3 }

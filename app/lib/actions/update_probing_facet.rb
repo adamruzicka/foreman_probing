@@ -23,13 +23,11 @@ module Actions
         to_create = up - known
         to_update = known & up
         to_remove = known & down
-        require 'pry'; binding.pry
         facet.scanned_ports.where(:protocol => protocol, :number => to_remove).delete_all
         # TODO: Maybe change something more than the timestamp?
         facet.scanned_ports.where(:protocol => protocol, :number => to_update).each(&:touch)
         to_create.each do |number|
-          port = ::ForemanProbing::Port.new_from_facts(protocol, port, value)
-          facet.scanned_ports << port
+          facet.scanned_ports << ::ForemanProbing::Port.new(:protocol => protocol, :number => number, :state => protocol_base[number]['state'])
         end
       end
     end

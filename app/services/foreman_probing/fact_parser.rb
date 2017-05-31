@@ -22,18 +22,18 @@ module ForemanProbing
     def ipmi_interface; end
 
     def get_interfaces # rubocop:disable Style/AccessorMethodName
-      count = [4,6].reduce(:+) { |_, i| facts[:addresses].fetch("ipv#{i}", {}).keys.count }
+      count = [4,6].map { |i| facts['addresses'].fetch("ipv#{i}", {}).keys.count }.reduce(:+)
       (0..count - 1).map { |i| "unknown#{i}" }
     end
 
     def get_facts_for_interface(interface)
       id = interface.match(/unknown(\d+)/)[1].to_i
-      hw, ip = facts[:addresses].partition { |addr| addr['type'] == 'hwaddr' }
-      ipv4, ipv6 = ip.partition { |addr| addr['type'] == 'ipv4' }
+      # hw, ip = facts['addresses'].partition { |addr| addr['type'] == 'hwaddr' }
+      # ipv4, ipv6 = ip.partition { |addr| addr['type'] == 'ipv4' }
       {
-        :ipaddress  => ipv4.fetch(id, {})['addr'],
-        :ip6address => ipv6.fetch(id, {})['addr'],
-        :macaddress => hw.fetch(id, {})['addr']
+        :ipaddress  => facts['addresses'].fetch('ipv4', {}).keys.fetch(id, nil),
+        :ip6address => facts['addresses'].fetch('ipv6', {}).keys.fetch(id, nil),
+        :macaddress => facts['addresses'].fetch('hwaddr', {}).keys.fetch(id, nil)
       }
     end
 

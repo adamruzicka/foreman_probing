@@ -3,15 +3,10 @@ module ForemanProbing
     belongs_to :probing_facet, :class_name => '::ForemanProbing::ProbingFacet'
     has_many :services
 
-    def self.new_from_facts(protocol, number, facts)
-      port = self.new
-      port.protocol = protocol
-      port.number = number
-      port.state = facts[:state]
-      port.services = facts["service"].map do |name, hash|
-        Service.new_from_hash(name, hash)
-      end
-      port
+    def update_from_facts(protocol, number, facts)
+      self.protocol = protocol
+      self.number = number
+      self.state = facts[:state]
     end
 
     def update_from_port(port)

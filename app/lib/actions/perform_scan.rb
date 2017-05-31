@@ -12,25 +12,16 @@ module Actions
                                      :targeting => targeting.to_hash,
                                      :probe_class => probe_class.to_s,
                                      :ports => ports, :options => options)
-        concurrence do
-          targeting.enumerate_targets.each do |target, options|
-            sequence do
-              parsed_scan = plan_action(::Actions::ForemanProbing::ImportHostFacts,
-                                        :target => target.to_s,
-                                        :facts => facts_for_host(target.to_s, scan.output)
-                                        :options => options)
-              plan_action(::Actions::ForemanProbing::UpdateProbingFacet, parsed_scan.output)
-            end
+        # TODO: Drop this, convert to action with sub plans, trigger sub plans for scan
+        targeting.enumerate_targets.each do |target, options|
+          sequence do
+            parsed_scan = plan_action(::Actions::ForemanProbing::ImportHostFacts,
+                                      :target => target.to_s,
+                                      :scan => scan.output,
+                                      :options => options || {})
+            plan_action(::Actions::ForemanProbing::UpdateProbingFacet, parsed_scan.output)
           end
         end
-      end
-
-      private
-
-      def facts_for_host(action, target)
-        facts.find do |fact|
-          fact[:addresses].values.map(&:keys).flatten.include? ip
-        end || {}
       end
     end
   end
