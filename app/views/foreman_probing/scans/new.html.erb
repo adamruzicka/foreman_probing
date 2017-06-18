@@ -48,20 +48,6 @@
 
   <%= selectable_f f, :scan_type, @scan.available_scan_types, {}, :label => _('Scan type'), :onchange => 'scan_type_change_handler(this)' %>
   
-  <%= f.fields_for :udp do |udp_f| %>
-  <div class="type-udp hidden">
-    <div class="col-md-4">
-      <%= selectable_f udp_f, :service, @scan.known_udp_services, {}, :label => _('Service detection') %>
-    </div>
-  </div>
-  <% end %>
-
-  <%= f.fields_for :icmp do |icmp_f| %>
-  <div class="type-icmp hidden">
-    <%= selectable_f icmp_f, :service, @scan.icmp_scan_types, {}, :label => _('ICMP Scan Type') %>
-  </div>
-  <% end %>
-  
   <%= text_f f, :ports, :label => _('Ports'), :help_inline => 'Single, port, coma-separated list or range FROM-TO', :class => "#{@scan.scan_type == 'ICMP' ? 'hidden' : ''}" %>
 
   <%= submit_or_cancel f, false, :cancel_path => foreman_probing_scans_path %>

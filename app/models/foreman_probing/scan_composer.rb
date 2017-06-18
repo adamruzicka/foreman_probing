@@ -3,7 +3,7 @@ module ForemanProbing
 
     attr_accessor :targeting, :ports, :probe, :proxy
 
-    def self.scan_from_params(params)
+    def self.new_from_params(params)
       self.new.tap do |c|
         c.targeting = c.targeting_from_params(params)
         c.ports = c.ports_from_params(params)

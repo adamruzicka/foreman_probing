@@ -6,7 +6,7 @@ module ForemanProbing
     end
 
     def create
-      composer = ScanComposer.scan_from_params(params[:foreman_probing_scan])
+      composer = ScanComposer.new_from_params(params[:foreman_probing_scan])
       task = ForemanTasks.async_task(::Actions::ForemanProbing::PerformScan,
                                      composer.proxy,
                                      composer.targeting,
