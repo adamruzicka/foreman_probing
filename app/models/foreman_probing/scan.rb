@@ -5,12 +5,12 @@ module ForemanProbing
     include ActiveModel::Conversion
     extend ActiveModel::Naming
 
-    attr_accessor :scan_type, :target_kind
+    attr_accessor :scan_type, :target_kind, :proxy_id
 
     attr_accessor :direct, :subnet, :host, :tcp, :udp, :icmp, :ports, :use_nmap
 
     def available_scan_types
-      ['UDP', 'TCP', 'ICMP']
+      ['TCP', 'UDP', 'ICMP']
     end
 
     def available_tcp_scan_options

@@ -13,8 +13,7 @@ module ForemanProbing
     end
 
     def proxy_from_params(params)
-      # TODO:
-      SmartProxy.first
+      SmartProxy.authorized.find(params['proxy_id'])
     end
 
     def ports_from_params(params)
@@ -34,7 +33,7 @@ module ForemanProbing
       when 'subnet'
         ::ForemanProbing::Targeting::Subnet.new(params[:subnet][:id])
       when 'host'
-        ::ForemanProbing::Targeting::Host.new(params[:search_query])
+        ::ForemanProbing::Targeting::Host.new(params[:host][:search_query])
       when 'proxy'
         ::ForemanProbing::Targeting::SubnetDiscovery.new
       end

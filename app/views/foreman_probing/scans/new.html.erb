@@ -1,28 +1,52 @@
+<script>
+  var target_kind_change_handler = function(element) {
+      var value = element.value.toLowerCase();
+      $('div.kind').each(function(child) {
+          if(this.classList.contains('kind-' + value)) {
+              $(this).show();
+          } else {
+              $(this).hide();
+          }
+      });
+  };
+  var scan_type_change_handler = function(element) {
+    var value = element.value;
+    var target = $('input#foreman_probing_scan_ports').closest('div.clearfix');
+    if(element.value != 'ICMP') {
+      target.show();
+    } else {
+      target.hide();
+    }
+  };
+</script>
+
 <%= title _('Scan') %>
 <%= form_for @scan do |f| %>
 
-  <%= selectable_f f, :target_kind, @scan.target_kinds, {}, :label => _('Target kind') %>
+  <%= selectable_f f, :target_kind, @scan.target_kinds, {}, :label => _('Target kind'), :onchange => 'target_kind_change_handler(this)' %>
 
   <%= f.fields_for :subnet do |subnet_f| %>
-  <div class="kind-subnet hidden">
-    <%= selectable_f subnet_f, 'id', Subnet.authorized.map { |s| ["#{s.name} (#{s.network}/#{s.mask}", s.id] } %>
+  <div class="kind kind-subnet hidden">
+    <%= selectable_f subnet_f, 'id', Subnet.authorized.map { |s| ["#{s.name} (#{s.network}/#{s.mask}", s.id] },
+                     {}, :label => 'Subnet' %>
   </div>
   <% end %>
 
   <%= f.fields_for :host do |host_f| %>
-  <div class="kind-host hidden">
+  <div class="kind kind-host hidden">
     <%= textarea_f host_f, :search_query, :label => _('Search query') %>
   </div>
   <% end %>
 
   <%= f.fields_for :direct do |direct_f| %>
-  <div class="kind-direct">
-    <%= text_f direct_f, :ip, :label => _('IP Address') %>
-    <%= text_f direct_f, :netmask, :label => _('Netmask') %>
+  <div class="kind kind-direct">
+    <%= text_f direct_f, :ip, :label => _('IP Address'), :help_inline => _('Comma separated list of IPv4 addresses, subnets or ranges') %>
   </div>
   <% end %>
 
-  <%= selectable_f f, :scan_type, @scan.available_scan_types, {}, :label => _('Scan type') %>
+  <%= selectable_f f, 'proxy_id', SmartProxy.authorized.map { |p| [p.name, p.id] }, {}, :label => 'Smart proxy', :help_inline => _('Smart Proxy to run the scan from')  %>
+
+  <%= selectable_f f, :scan_type, @scan.available_scan_types, {}, :label => _('Scan type'), :onchange => 'scan_type_change_handler(this)' %>
   
   <%= f.fields_for :udp do |udp_f| %>
   <div class="type-udp hidden">
@@ -38,7 +62,7 @@
   </div>
   <% end %>
   
-  <%= text_f f, :ports, :label => _('Ports'), :help_inline => 'Single, port, coma-separated list or range FROM-TO' %>
+  <%= text_f f, :ports, :label => _('Ports'), :help_inline => 'Single, port, coma-separated list or range FROM-TO', :class => "#{@scan.scan_type == 'ICMP' ? 'hidden' : ''}" %>
 
   <%= submit_or_cancel f, false, :cancel_path => foreman_probing_scans_path %>
 

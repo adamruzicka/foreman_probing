@@ -6,10 +6,6 @@ module ForemanProbing
       def targets
         raise NotImplementedError
       end
-
-      def enumerate_targets
-        targets
-      end
     end
 
     class Direct < Abstract
@@ -36,13 +32,6 @@ module ForemanProbing
         end
       end
 
-      def enumerate_targets
-        targets.map do |target|
-          ip = IPAddr.new(target)
-          ip.to_range.entries
-        end.flatten
-      end
-
       private
 
       # TODO: Do some validation
@@ -65,12 +54,14 @@ module ForemanProbing
     end
 
     class Subnet < Abstract
-      def initialize(subnet)
-        @subnet = subnet
+      def initialize(subnet_id)
+        @subnet = ::Subnet.authorized.find(subnet_id)
       end
 
       def targets
-        @targets ||= "#{@subnet.network}/#{@subnet.mask}"
+        # TODO: This is ugly
+        cidr = IPAddr.new(@subnet.mask).to_i.to_s(2).count('1')
+        @targets ||= "#{@subnet.network}/#{cidr}"
       end
     end
 
@@ -86,13 +77,9 @@ module ForemanProbing
       end
 
       def resolve_hosts!
-        @hosts = Host.authorized(RESOLVE_PERMISSION, Host)
-                     .search_for(@search_query)
-      end
-
-      def enumerate_targets
-        @hosts ||= resolve_hosts!
-        @hosts.map { |host| [host.interfaces.first.ip, :other_ips => host.interfaces.map(&:ip), :host_id => host.id] }
+        # @hosts = Host.authorized(RESOLVE_PERMISSION, Host)
+        #              .search_for(@search_query)
+        @hosts = ::Host.authorized.search_for(@search_query)
       end
     end
 
