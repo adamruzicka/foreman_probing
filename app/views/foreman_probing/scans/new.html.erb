@@ -5,20 +5,20 @@
 
   <%= f.fields_for :subnet do |subnet_f| %>
   <div class="kind-subnet hidden">
-  <%= selectable_f subnet_f, 'id', Subnet.authorized.map { |s| ["#{s.name} (#{s.network}/#{s.mask}", s.id] } %>
+    <%= selectable_f subnet_f, 'id', Subnet.authorized.map { |s| ["#{s.name} (#{s.network}/#{s.mask}", s.id] } %>
   </div>
   <% end %>
 
   <%= f.fields_for :host do |host_f| %>
   <div class="kind-host hidden">
-  <%= textarea_f host_f, :search_query, :label => _('Search query') %>
+    <%= textarea_f host_f, :search_query, :label => _('Search query') %>
   </div>
   <% end %>
 
   <%= f.fields_for :direct do |direct_f| %>
   <div class="kind-direct">
-  <%= text_f direct_f, :ip, :label => _('IP Address') %>
-  <%= text_f direct_f, :netmask, :label => _('Netmask') %>
+    <%= text_f direct_f, :ip, :label => _('IP Address') %>
+    <%= text_f direct_f, :netmask, :label => _('Netmask') %>
   </div>
   <% end %>
 
@@ -27,14 +27,14 @@
   <%= f.fields_for :udp do |udp_f| %>
   <div class="type-udp hidden">
     <div class="col-md-4">
-    <%= selectable_f udp_f, :service, @scan.known_udp_services, {}, :label => _('Service detection') %>
+      <%= selectable_f udp_f, :service, @scan.known_udp_services, {}, :label => _('Service detection') %>
     </div>
   </div>
   <% end %>
 
   <%= f.fields_for :icmp do |icmp_f| %>
   <div class="type-icmp hidden">
-  <%= selectable_f icmp_f, :service, @scan.icmp_scan_types, {}, :label => _('ICMP Scan Type') %>
+    <%= selectable_f icmp_f, :service, @scan.icmp_scan_types, {}, :label => _('ICMP Scan Type') %>
   </div>
   <% end %>
   

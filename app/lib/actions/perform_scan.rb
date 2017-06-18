@@ -1,27 +1,23 @@
 module Actions
   module ForemanProbing
     class PerformScan < Actions::EntryAction
+      include ::Actions::Helpers::WithContinuousOutput
       include ::Actions::Helpers::WithDelegatedAction
 
       middleware.do_not_use Dynflow::Middleware::Common::Transaction
 
-      # def plan(targets, probe_class, ports, options = {})
-      def plan(targeting, probe_class, ports, options = {})
-        proxy = options[:proxy] || ::ForemanProbing::ProxySelector.new.determine_proxy
-        scan = plan_delegated_action(proxy, ForemanProbingCore::Actions::UseProbe,
-                                     :targeting => targeting.to_hash,
-                                     :probe_class => probe_class.to_s,
-                                     :ports => ports, :options => options)
-        # TODO: Drop this, convert to action with sub plans, trigger sub plans for scan
-        targeting.enumerate_targets.each do |target, options|
-          sequence do
-            parsed_scan = plan_action(::Actions::ForemanProbing::ImportHostFacts,
-                                      :target => target.to_s,
-                                      :scan => scan.output,
-                                      :options => options || {})
-            plan_action(::Actions::ForemanProbing::UpdateProbingFacet, parsed_scan.output)
-          end
-        end
+      def plan(proxy, targeting, scan_type, ports, options = {})
+        options[:subnet_discovery] = true if targeting.is_a? ::ForemanProbing::Targeting::SubnetDiscovery
+        scan = plan_delegated_action(proxy, 'ForemanProbingCore::Actions::UseProbe',
+                                     :targets => targeting.targets,
+                                     :scan_type => scan_type,
+                                     :ports => ports,
+                                     :options => options)
+        subnets = plan_action(CreateSubnets, :proxy_id => proxy.id, :scan => scan.output) if targeting.is_a? ::ForemanProbing::Targeting::SubnetDiscovery
+        plan_action(::Actions::ForemanProbing::ProcessScan,
+                    :scan => scan.output,
+                    :proxy_id => proxy.nil? ? nil : proxy.id,
+                    :options => options)
       end
     end
   end

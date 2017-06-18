@@ -28,7 +28,7 @@ module ForemanProbingCore
 
       def initialize(hosts, ports = COMMON_PORTS, options = {})
         hosts    = Array(hosts)
-        @hosts   = hosts.map { |host| IPAddr.new(host) }
+        @hosts   = hosts
         @ports   = Array(ports)
         @options = options
       end

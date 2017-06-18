@@ -1,25 +1,20 @@
 module ForemanProbing
   class ScanComposer
 
-    attr_accessor :targeting, :ports, :probe
+    attr_accessor :targeting, :ports, :probe, :proxy
 
     def self.scan_from_params(params)
       self.new.tap do |c|
         c.targeting = c.targeting_from_params(params)
         c.ports = c.ports_from_params(params)
-        c.probe = c.probe_from_params(params)
+        c.probe = params[:scan_type]
+        c.proxy = c.proxy_from_params(params)
       end
     end
 
-    def probe_from_params(params)
-      case params[:scan_type].downcase
-    when 'tcp'
-        ForemanProbingCore::Probes::TCP
-      when 'udp'
-        ForemanProbingCore::Probes::UDP
-      when 'icmp'
-        ForemanProbingCore::Probes::ICMP
-      end
+    def proxy_from_params(params)
+      # TODO:
+      SmartProxy.first
     end
 
     def ports_from_params(params)
@@ -35,13 +30,14 @@ module ForemanProbing
     def targeting_from_params(params)
       case params[:target_kind].downcase
       when 'direct'
-        ::ForemanProbingCore::Targeting::Direct.new(params[:direct][:ip])
+        ::ForemanProbing::Targeting::Direct.new(params[:direct][:ip])
       when 'subnet'
-        ::ForemanProbingCore::Targeting::Subnet.new(params[:subnet][:id])
+        ::ForemanProbing::Targeting::Subnet.new(params[:subnet][:id])
       when 'host'
-        ::ForemanProbingCore::Targeting::Host.new(params[:search_query])
+        ::ForemanProbing::Targeting::Host.new(params[:search_query])
+      when 'proxy'
+        ::ForemanProbing::Targeting::SubnetDiscovery.new
       end
     end
-
   end
 end

@@ -1,4 +1,4 @@
-module ForemanProbingCore
+module ForemanProbing
   module Targeting
     class Abstract
 
@@ -7,17 +7,8 @@ module ForemanProbingCore
         raise NotImplementedError
       end
 
-      # 
       def enumerate_targets
         targets
-      end
-
-      def to_hash
-        { :class => self.class.to_s }
-      end
-
-      def self.new_from_hash
-        raise NotImplementedError
       end
     end
 
@@ -52,14 +43,6 @@ module ForemanProbingCore
         end.flatten
       end
 
-      def to_hash
-        super.merge :addresses => @addresses
-      end
-
-      def self.new_from_hash(hash)
-        self.new(hash[:addresses])
-      end
-
       private
 
       # TODO: Do some validation
@@ -69,7 +52,7 @@ module ForemanProbingCore
         elsif str.is_a? Hash
           str
         else
-          require 'pry'; binding.pry
+          # TODO: Somehow use IPAddr
           str.split(',').map do |ip|
             if ip =~ /(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})(\/(\d{1,2}))?/
               { :family => :inet, :addr => $1, :netmask => $3 }
@@ -82,7 +65,6 @@ module ForemanProbingCore
     end
 
     class Subnet < Abstract
-
       def initialize(subnet)
         @subnet = subnet
       end
@@ -90,22 +72,9 @@ module ForemanProbingCore
       def targets
         @targets ||= "#{@subnet.network}/#{@subnet.mask}"
       end
-
-      def to_hash
-        super.merge({ :subnet_id => @subnet.id, :addr => @subnet.network, :netmask => @subnet.mask })
-      end
-
-      def self.new_from_hash(hash)
-        subnet = Struct.new(:id, :network, :mask)
-        subnet.id = hash[:subnet_id]
-        subnet.network = hash[:addr]
-        subnet.mask = hash[:netmask]
-        self.new subnet
-      end
     end
 
     class Host < Abstract
-
       def initialize(search_query, hosts = nil)
         @search_query = search_query
         @hosts = hosts
@@ -113,7 +82,7 @@ module ForemanProbingCore
 
       def targets
         @hosts ||= resolve_hosts!
-        @targets ||= @hosts.map { |host| host.interfaces.map(&:ip) }
+        @targets ||= @hosts.map { |host| host.interfaces.map(&:ip) }.flatten
       end
 
       def resolve_hosts!
@@ -125,25 +94,11 @@ module ForemanProbingCore
         @hosts ||= resolve_hosts!
         @hosts.map { |host| [host.interfaces.first.ip, :other_ips => host.interfaces.map(&:ip), :host_id => host.id] }
       end
+    end
 
-      def to_hash
-        super.merge({ :search_query => @search_query, :hosts => @hosts.map { |host| host_to_hash(host) } })
-      end
-
-      def self.new_from_hash(hash)
-        hosts = hash[:hosts].map do |host|
-          h = Struct.new(:id, :interfaces)
-          interfaces = host[:addresses].map { |addr| Struct.new(:ip).tap { |int| int.ip = addr } }
-          h.interfaces = interfaces
-          h
-        end
-        self.new hash[:search_query], hosts
-      end
-
-      private
-
-      def host_to_hash(host)
-        { :id => host.id, :addresses => host.interfaces.map(&:ip) }
+    class SubnetDiscovery < Abstract
+      def targets
+        []
       end
     end
   end

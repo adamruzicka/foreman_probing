@@ -3,17 +3,21 @@ module Actions
     class ImportHostFacts < ::Dynflow::Action
 
       def run
-        facts = facts_for_host(input[:target], input[:scan][:facts])
+        facts = input[:facts]
         # If we're not scanning an already existing host and it is down, we don't want to import it to Foreman
         unless (input[:options][:host_id].nil? && facts.fetch(:status, {})[:state] == 'down')
           host = determine_host(facts)
+          facts = try_match_interface_names(host, facts)
           ::User.as :admin do
             state          = host.import_facts(facts)
             output[:state] = state
             output[:facts] = facts
           end
+          try_set_subnet!(host)
+          host.smart_proxy_ids << input[:proxy_id] unless input[:proxy_id].nil?
           output[:host_id] = host.id
           output[:hostname] = host.name
+          host.save!
         end
       rescue ::Foreman::Exception => e
         # This error is what is thrown by Host#ImportHostAndFacts when
@@ -24,10 +28,25 @@ module Actions
 
       private
 
-      def facts_for_host(target, facts)
-        facts.find do |fact|
-          fact[:addresses].values.map(&:keys).flatten.include? target
-        end || {}
+      def try_match_interface_names(host, facts)
+        return facts[:addresses][:ipv4].keys.count.times.map { |i| "unknown#{i}" } if host.nil?
+        names = host.interfaces.where(:mac => facts.fetch(:addresses, {}).fetch(:hwaddr, {}).keys).map(&:identifier)
+        if names.count != facts[:addresses][:ipv4].keys
+          names = facts[:addresses][:ipv4].keys.count.times.map { |i| "unknown#{i}" }
+        end
+        facts[:addresses][:name] = names
+        facts
+      end
+
+      def try_set_subnet!(host)
+        return unless host.subnet.nil? # We don't want to redefine already set subnet
+        subnet = if input[:subnet_id]
+                   Subnet.find(input[:subnet_id])
+                 # TODO: Add middle branch when scanning proxy's subnet
+                 else
+                   Subnet.all.find { |subnet| subnet.ipaddr.include? host.ip } # Try to find a defined subnet
+                 end
+        host.subnet = subnet if subnet
       end
 
       def determine_host(facts)
@@ -36,15 +55,17 @@ module Actions
           ifaces = ::Nic::Managed.where(:mac => macs)
           return ifaces.first.host unless ifaces.empty?
         end
-        Host::Managed.import_host(determine_hostname(facts, input[:target]), :foreman_probing)
+        Host::Managed.import_host(determine_hostname(facts).dup, :foreman_probing)
       end
 
-      def determine_hostname(facts, fallback)
-        # Try to use first of its hostnames, fallback to the ip
-        if facts[:hostnames].empty?
-          fallback
-        else
+      def determine_hostname(facts)
+        # Try to use first of its hostnames, fallback to some of its addresses
+        if !facts[:hostnames].empty?
           facts[:hostnames].first[:name]
+        else
+          name = facts[:addresses].map { |_kind, values| values.keys }.flatten.first
+          raise 'Cannot determine host name' if name.nil?
+          name
         end
       end
     end

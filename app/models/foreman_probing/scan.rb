@@ -22,7 +22,7 @@ module ForemanProbing
     end
 
     def target_kinds
-      ['Direct', 'Subnet', 'Host']
+      ['Direct', 'Subnet', 'Host', 'Proxy']
     end
 
     # TODO: Obtain dynamically

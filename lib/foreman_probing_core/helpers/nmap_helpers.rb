@@ -36,7 +36,8 @@ module ForemanProbingCore
       end
 
       def nmap_ipv6_flag
-        @hosts.first.ipv6? ? '-6' : ''
+        # @hosts.first.ipv6? ? '-6' : ''
+        ''
       end
 
       # By default just return whatever is passed in
@@ -65,7 +66,7 @@ module ForemanProbingCore
             acc.merge(port.protocol => acc.fetch(port.protocol, {}).merge(record))
           end
           {
-            :_type => :foreman_probing,
+            :_type     => :foreman_probing,
             :addresses => factify_addresses(lookup_addresses(host.addresses.map(&:to_h))),
             :hostnames => host.hostnames.map(&:to_h),
             :ports     => ports,
