@@ -17,6 +17,8 @@ module Actions
           host.smart_proxy_ids << input[:proxy_id] unless input[:proxy_id].nil?
           output[:host_id] = host.id
           output[:hostname] = host.name
+          scan = ::ForemanProbing::Scan.find(input[:scan_id])
+          host.scans << scan
           host.save!
         end
       rescue ::Foreman::Exception => e

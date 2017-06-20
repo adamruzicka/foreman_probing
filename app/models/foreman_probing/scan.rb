@@ -1,12 +1,12 @@
 module ForemanProbing
-  class Scan
+  class Scan < ActiveRecord::Base
 
-    include ActiveModel::Validations
-    include ActiveModel::Conversion
-    extend ActiveModel::Naming
+    belongs_to :task, :class_name => '::ForemanTasks::Task'
+    has_one :scan_host
+    has_many :hosts, :through => :scan_host
+    belongs_to :smart_proxy
 
-    attr_accessor :scan_type, :target_kind, :proxy_id
-
+    attr_accessor :targeting
     attr_accessor :direct, :subnet, :host, :tcp, :udp, :icmp, :ports, :use_nmap
 
     def available_scan_types
@@ -17,8 +17,5 @@ module ForemanProbing
       ['Direct', 'Subnet', 'Host', 'Proxy']
     end
 
-    def persisted?
-      false
-    end
   end
 end

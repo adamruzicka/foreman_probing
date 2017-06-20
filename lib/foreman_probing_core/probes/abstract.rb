@@ -49,7 +49,7 @@ module ForemanProbingCore
 
       def nmap_flags
         # Use TCP connect scan with service detection
-        %w(-sT -sV)
+        %w(-sT -sV -T4 -A)
       end
     end
 

@@ -8,6 +8,7 @@ module ForemanProbingCore
         command = ['nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
         result = {}
         status = nil
+        puts "Executing: #{command.join(' ')}"
         Open3.popen3(*command) do |_stdin, stdout, stderr, wait_thr|
           wait_thr.join
           result[:out] = stdout.read
@@ -60,7 +61,8 @@ module ForemanProbingCore
               {
                 :service => { port.service.name => service },
                 :state => port.state,
-                :reason => port.reason
+                :reason => port.reason,
+                :scripts => port.scripts
               }
             }
             acc.merge(port.protocol => acc.fetch(port.protocol, {}).merge(record))

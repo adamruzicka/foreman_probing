@@ -13,7 +13,7 @@ module ForemanProbing
     end
 
     def proxy_from_params(params)
-      SmartProxy.authorized.find(params['proxy_id'])
+      SmartProxy.authorized.find(params['smart_proxy_id'])
     end
 
     def ports_from_params(params)

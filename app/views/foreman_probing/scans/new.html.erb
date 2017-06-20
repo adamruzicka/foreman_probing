@@ -44,7 +44,7 @@
   </div>
   <% end %>
 
-  <%= selectable_f f, 'proxy_id', SmartProxy.authorized.map { |p| [p.name, p.id] }, {}, :label => 'Smart proxy', :help_inline => _('Smart Proxy to run the scan from')  %>
+  <%= selectable_f f, 'smart_proxy_id', SmartProxy.authorized.map { |p| [p.name, p.id] }, {}, :label => 'Smart proxy', :help_inline => _('Smart Proxy to run the scan from')  %>
 
   <%= selectable_f f, :scan_type, @scan.available_scan_types, {}, :label => _('Scan type'), :onchange => 'scan_type_change_handler(this)' %>
   

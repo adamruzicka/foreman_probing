@@ -3,7 +3,8 @@ module ForemanProbing
     extend ActiveSupport::Concern
 
     included do
-      # execute callbacks
+      has_many :scan_hosts, :class_name => '::ForemanProbing::ScanHost', :foreign_key => :host_id
+      has_many :scans, :through => :scan_hosts, :class_name => '::ForemanProbing::Scan'
     end
 
     # create or overwrite instance methods...

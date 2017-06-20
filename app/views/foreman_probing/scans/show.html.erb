@@ -1,1 +1,39 @@
-<h1>TODO:</h1>
+<% title 'Scan' %>
+
+<!-- TODO: Buttons -->
+<% if @scan.task %>
+    <% title_actions(button_group(scan_task_buttons(@scan.task))) %>
+<% end %>
+
+<div class="col-md-6">
+    <h4>Details</h4>
+    <b><%= _("Smart proxy") %></b>: <a href="<%= url_for(@scan.smart_proxy) %>"><%= @scan.smart_proxy.name %></a><br>
+    <b><%= _("Scan type") %></b>: <%= @scan.scan_type %><br>
+    <b><%= _("Ports") %></b>: <%= @scan.ports %><br>
+</div>
+
+<div class="col-md-6 infoblock">
+    <h4>Scanned hosts</h4>
+    <% if @scan.task && %w(stopped paused).include?(@scan.task.state) %>
+        <table class="table table-bordered table-condensed">
+            <tr><th>Host</th><th>State</th></tr>
+            <% @scan.hosts.each do |host| %>
+                <tr><td><a href="<%= url_for(host) %>"><%= host.name %></a></td>
+                    <td><%= host.probing_facet.status %></td>
+                </tr>
+            <% end %>
+        </table>
+    <% else %>
+        <div class="alert alert-info">
+            The task is still running.
+        </div>
+    <% end %>
+</div>
+
+<% if @auto_refresh %>
+<script id="scan_show_refresh">
+ setTimeout(function () {
+     location.reload();
+ }, 10000);
+</script>
+<% end %>

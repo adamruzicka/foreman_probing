@@ -5,7 +5,7 @@ module ForemanProbing
     engine_name 'foreman_probing'
 
     config.autoload_paths += Dir["#{config.root}/app/controllers/concerns"]
-    config.autoload_paths += Dir["#{config.root}/app/helpers/concerns"]
+    config.autoload_paths += Dir["#{config.root}/app/helpers"]
     config.autoload_paths += Dir["#{config.root}/app/models/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/overrides"]
     config.autoload_paths += Dir["#{config.root}/app/services"]
@@ -62,7 +62,8 @@ module ForemanProbing
     # Include concerns in this config.to_prepare block
     config.to_prepare do
       begin
-        # Host::Managed.send(:include, ForemanProbing::HostExtensions)
+        Host::Managed.send(:include, ForemanProbing::HostExtensions)
+        ForemanTasks::Task.send(:include, ForemanProbing::ForemanTasksTaskExtensions)
         # HostsHelper.send(:include, ForemanProbing::HostsHelperExtensions)
 
         ::FactImporter.register_fact_importer(
