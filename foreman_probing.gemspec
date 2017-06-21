@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
             %w(LICENSE Rakefile README.md lib/foreman_probing.rb)
   s.test_files = Dir['test/**/*']
 
-  # s.add_dependency 'deface'
+  s.add_dependency 'deface'
   s.add_dependency 'foreman_probing_core'
   s.add_dependency 'foreman-tasks', '~> 0.9'
   s.add_dependency 'dynflow', '~> 0.8.10'

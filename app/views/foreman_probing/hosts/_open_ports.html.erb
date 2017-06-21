@@ -1,0 +1,19 @@
+<% if @host.probing_facet.scanned_ports.count.zero? %>
+    <div class="alert alert-info"><%= _('This host has no known open ports') %></div>
+<% else %>
+    <table id="open_ports_table" class="<%= table_css_classes %>">
+        <thead>
+            <tr>
+                <th><%= _('Port') %></th>
+                <th><%= _('Updated at') %></th>
+            </tr>
+        </thead>
+        <% @host.probing_facet.scanned_ports.each do |port| %>
+            <tr>
+                <td><%= port.number %>/<%= port.protocol %></td>
+                <td><%= port.updated_at %></td>
+            </tr>
+        <% end %>
+    </table>
+<% end %>
+<br>

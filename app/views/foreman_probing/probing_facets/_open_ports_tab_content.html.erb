@@ -1,0 +1,6 @@
+<%= render_original %>
+<% unless @host.probing_facet.nil? %>
+    <div id="open-ports" class="tab-pane" data-ajax-url='<%= open_ports_foreman_probing_host_path(@host)%>'>
+        <%= spinner(_('Loading information about opened ports ...')) %>
+    </div>
+<% end %>

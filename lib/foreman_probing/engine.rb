@@ -1,4 +1,4 @@
-# require 'deface'
+require 'deface'
 
 module ForemanProbing
   class Engine < ::Rails::Engine
@@ -25,7 +25,7 @@ module ForemanProbing
 
         # Add permissions
         security_block :foreman_probing do
-          permission :view_foreman_probing, :'foreman_probing/hosts' => [:new_action]
+          permission :view_foreman_probing_open_ports, :hosts => [:open_ports], :resource_type => 'Host'
         end
 
         # Add a new role called 'Discovery' if it doesn't exist
