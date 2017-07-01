@@ -29,11 +29,11 @@ module ForemanProbing
     def targeting_from_params(params)
       case params[:target_kind].downcase
       when 'direct'
-        ::ForemanProbing::Targeting::Direct.new(params[:direct][:ip])
+        ::ForemanProbing::Targeting::Direct.new(:raw_targets => params[:direct][:ip])
       when 'subnet'
-        ::ForemanProbing::Targeting::Subnet.new(params[:subnet][:id])
+        ::ForemanProbing::Targeting::Subnet.new(:raw_targets => params[:subnet][:id])
       when 'host'
-        ::ForemanProbing::Targeting::Host.new(params[:host][:search_query])
+        ::ForemanProbing::Targeting::Host.new(:raw_targets => params[:host][:search_query])
       when 'proxy'
         ::ForemanProbing::Targeting::SubnetDiscovery.new
       end

@@ -1,0 +1,9 @@
+class CreateForemanProbingTargetings < ActiveRecord::Migration
+  def change
+    create_table :foreman_probing_targetings do |t|
+      t.string :type, index: true, null: false
+      t.string :raw_targets, index: true, null: false
+      t.belongs_to :scan, index: true
+    end
+  end
+end
