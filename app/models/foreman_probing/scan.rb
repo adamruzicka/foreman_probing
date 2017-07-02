@@ -7,7 +7,21 @@ module ForemanProbing
     has_many :hosts, :through => :scan_host
     belongs_to :smart_proxy
 
-    attr_accessor :direct, :subnet, :host, :tcp, :udp, :icmp, :ports, :use_nmap
+    attr_accessor :direct, :subnet, :host, :tcp, :udp, :icmp, :use_nmap
+
+    def ports
+      if @ports.nil?
+        return [] if raw_ports.nil?
+        ranges = raw_ports.split(',')
+        ports = ranges.map do |range|
+          range.split('-').map do |from, to|
+            to.nil? ? from : (from..to).entries
+          end
+        end
+        @ports = ports.flatten.map(&:chomp).map(&:to_i)
+      end
+      @ports
+    end
 
     def available_scan_types
       ['TCP', 'UDP', 'ICMP']

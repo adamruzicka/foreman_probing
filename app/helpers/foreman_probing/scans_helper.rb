@@ -1,8 +1,10 @@
 module ForemanProbing
   module ScansHelper
-    def scan_task_buttons(task)
+    def scan_task_buttons(scan)
+      task = scan.task
       task_authorizer = Authorizer.new(User.current, :collection => [task])
       buttons = []
+      buttons << link_to(_('Rerun'), rerun_foreman_probing_scan_path(scan), :class => 'btn btn-default', :title => _('Refresh this page'))
       buttons << link_to(_('Refresh'), {}, :class => 'btn btn-default', :title => _('Refresh this page'))
       # if authorized_for(hash_for_new_job_invocation_path)
       #   buttons << link_to(_('Rerun'), rerun_job_invocation_path(:id => job_invocation.id),

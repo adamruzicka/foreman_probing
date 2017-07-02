@@ -1,24 +1,31 @@
 module ForemanProbing
   class ScansController < ::ApplicationController
 
+    def index
+      @scans = resource_base.paginate(:page => params[:page])
+    end
+
     def new
       @scan = ForemanProbing::Scan.new
     end
 
     def create
       composer = ScanComposer.new_from_params(params[:foreman_probing_scan])
-      @scan = ForemanProbing::Scan.new
-      @scan.targeting = composer.targeting
-      @scan.smart_proxy = composer.proxy
-      @scan.scan_type = composer.probe
-      @scan.save!
+      @scan = composer.compose!
       task = ForemanTasks.async_task(::Actions::ForemanProbing::PerformScan,
                                      @scan,
-                                     composer.ports)
+                                     @scan.ports)
       @scan.task = task
       @scan.save!
       set_auto_refresh
       redirect_to @scan
+    end
+
+    def rerun
+      composer = ScanComposer.new_from_scan(ForemanProbing::Scan.find(params['id']))
+      @scan = composer.compose!
+
+      render :action => 'new'
     end
 
     def show

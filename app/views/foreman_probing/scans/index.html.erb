@@ -1,1 +1,27 @@
-<h1>TODO:</h1>
+<% title _('Scans') %>
+
+<% title_actions([new_link(_('Run Scan'))]) %>
+
+<table class="table table-bordered table-condensed">
+    <thead>
+        <tr>
+            <th>Scan type</th>
+            <th>Ports</th>
+            <th>Smart Proxy</th>
+            <th>Targeting</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% @scans.each do |scan| %>
+            <tr>
+                <td><%= scan.scan_type %></td>
+                <td><%= scan.ports %></td>
+                <td><%= scan.smart_proxy.name %></td>
+                <td><%= scan.targeting.type %>: <%= scan.targeting.raw_targets %></td>
+                <td><%= link_to(_('Rerun'), rerun_foreman_probing_scan_path(:id => scan.id)) %></td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>
+<%= will_paginate_with_info @scans %>

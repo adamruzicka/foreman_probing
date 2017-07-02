@@ -2,14 +2,14 @@
 
 <!-- TODO: Buttons -->
 <% if @scan.task %>
-    <% title_actions(button_group(scan_task_buttons(@scan.task))) %>
+    <% title_actions(button_group(scan_task_buttons(@scan))) %>
 <% end %>
 
 <div class="col-md-6">
     <h4>Details</h4>
     <b><%= _("Smart proxy") %></b>: <a href="<%= url_for(@scan.smart_proxy) %>"><%= @scan.smart_proxy.name %></a><br>
     <b><%= _("Scan type") %></b>: <%= @scan.scan_type %><br>
-    <b><%= _("Ports") %></b>: <%= @scan.ports %><br>
+    <b><%= _("Ports") %></b>: <%= @scan.ports.join(', ') %><br>
 </div>
 
 <div class="col-md-6 infoblock">

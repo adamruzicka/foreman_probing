@@ -12,18 +12,39 @@ module ForemanProbing
       end
     end
 
+    def self.new_from_scan(scan)
+      self.new.tap do |c|
+        c.targeting = scan.targeting.dup
+        c.ports = scan.raw_ports
+        c.probe = scan.scan_type
+        c.proxy = scan.smart_proxy
+      end
+    end
+
+    def compose!
+      if @scan.nil?
+        @scan = ForemanProbing::Scan.new
+        @scan.targeting = targeting
+        @scan.smart_proxy = proxy
+        @scan.scan_type = probe
+        @scan.raw_ports = ports
+      end
+      @scan
+    end
+
     def proxy_from_params(params)
       SmartProxy.authorized.find(params['smart_proxy_id'])
     end
 
     def ports_from_params(params)
-      ranges = params[:ports].split(',')
-      ports = ranges.map do |range|
-        range.split('-').map do |from, to|
-          to.nil? ? from : (from..to).entries
-        end
-      end
-      ports.flatten.map(&:chomp).map(&:to_i)
+      # ranges = params[:ports].split(',')
+      # ports = ranges.map do |range|
+      #   range.split('-').map do |from, to|
+      #     to.nil? ? from : (from..to).entries
+      #   end
+      # end
+      # ports.flatten.map(&:chomp).map(&:to_i)
+      params[:raw_ports]
     end
 
     def targeting_from_params(params)

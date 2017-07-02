@@ -29,7 +29,7 @@ module ForemanProbing
         end
 
         # Add a new role called 'Discovery' if it doesn't exist
-        role 'ForemanProbing', [:view_foreman_probing]
+        # role 'ForemanProbing', [:view_foreman_probing]
 
         # add menu entry
         menu :top_menu, :template,

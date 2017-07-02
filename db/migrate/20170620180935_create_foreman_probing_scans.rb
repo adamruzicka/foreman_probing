@@ -4,7 +4,7 @@ class CreateForemanProbingScans < ActiveRecord::Migration
       t.belongs_to :smart_proxy, :index => true
       t.string :target_kind
       t.string :scan_type
-      t.string :ports
+      t.string :raw_ports
       t.string :task_id
     end
 
