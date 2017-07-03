@@ -12,6 +12,7 @@ module ForemanProbing
     def create
       composer = ScanComposer.new_from_params(params[:foreman_probing_scan])
       @scan = composer.compose!
+      @scan.save!
       task = ForemanTasks.async_task(::Actions::ForemanProbing::PerformScan,
                                      @scan,
                                      @scan.ports)
