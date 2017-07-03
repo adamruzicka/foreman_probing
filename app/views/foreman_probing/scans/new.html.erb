@@ -11,7 +11,7 @@
   };
   var scan_type_change_handler = function(element) {
     var value = element.value;
-    var target = $('input#foreman_probing_scan_ports').closest('div.clearfix');
+    var target = $('input#foreman_probing_scan_raw_ports').closest('div.clearfix');
     if(element.value != 'ICMP') {
       target.show();
     } else {
