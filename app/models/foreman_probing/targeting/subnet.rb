@@ -1,8 +1,12 @@
 module ForemanProbing
-  class Targeting::Subnet < Targeting
+  class Targeting::Subnet < ForemanProbing::Targeting
     # def initialize(subnet_id)
     #   @subnet = ::Subnet.authorized.find(subnet_id)
     # end
+
+    def target_kind
+      'subnet'
+    end
 
     def targets
       # TODO: This is ugly

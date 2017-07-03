@@ -4,7 +4,7 @@ module Actions
       include ::Actions::Helpers::WithContinuousOutput
       include ::Actions::Helpers::WithDelegatedAction
 
-      middleware.do_not_use Dynflow::Middleware::Common::Transaction
+      # middleware.do_not_use Dynflow::Middleware::Common::Transaction
       middleware.use Actions::Middleware::KeepCurrentUser
 
       def plan(scan, ports, options = {})

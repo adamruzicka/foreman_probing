@@ -7,7 +7,7 @@ module ForemanProbing
     has_many :hosts, :through => :scan_host
     belongs_to :smart_proxy
 
-    attr_accessor :direct, :subnet, :host, :tcp, :udp, :icmp, :use_nmap
+    attr_accessor :direct, :target_kind, :search_query, :subnet_id
 
     def ports
       if @ports.nil?

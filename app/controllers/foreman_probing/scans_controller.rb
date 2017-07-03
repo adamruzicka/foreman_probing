@@ -2,16 +2,17 @@ module ForemanProbing
   class ScansController < ::ApplicationController
 
     def index
-      @scans = resource_base.paginate(:page => params[:page])
+      @scans = resource_base.order(:id => 'desc').paginate(:page => params[:page])
     end
 
     def new
       @scan = ForemanProbing::Scan.new
+      @scan.targeting = ::ForemanProbing::Targeting.new
     end
 
     def create
-      composer = ScanComposer.new_from_params(params[:foreman_probing_scan])
-      @scan = composer.compose!
+      @composer = ScanComposer.new_from_params(params[:foreman_probing_scan])
+      @scan = @composer.compose!
       @scan.save!
       task = ForemanTasks.async_task(::Actions::ForemanProbing::PerformScan,
                                      @scan,

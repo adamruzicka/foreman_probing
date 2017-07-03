@@ -23,6 +23,10 @@ module ForemanProbing
       end
     end
 
+    def target_kind
+      'direct'
+    end
+
     private
 
     # TODO: Do some validation

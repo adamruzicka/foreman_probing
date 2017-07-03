@@ -5,21 +5,25 @@
 <table class="table table-bordered table-condensed">
     <thead>
         <tr>
+            <th>ID</th>
             <th>Scan type</th>
             <th>Ports</th>
             <th>Smart Proxy</th>
             <th>Targeting</th>
+            <th>Run at</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         <% @scans.each do |scan| %>
             <tr>
+                <td><a href="<%= url_for(scan) %>"><%= scan.id %></a></td>
                 <td><%= scan.scan_type %></td>
-                <td><%= scan.ports %></td>
+                <td><%= scan.ports.join(', ') %></td>
                 <td><%= scan.smart_proxy.name %></td>
-                <td><%= scan.targeting.type %>: <%= scan.targeting.raw_targets %></td>
-                <td><%= link_to(_('Rerun'), rerun_foreman_probing_scan_path(:id => scan.id)) %></td>
+                <td><%= targeting_label(scan.targeting) %></td>
+                <td><%= scan.task && scan.task.started_at %></td>
+                <td><a href="<%= rerun_foreman_probing_scan_path(:id => scan.id) %>" class="btn">Rerun</a></td>
             </tr>
         <% end %>
     </tbody>

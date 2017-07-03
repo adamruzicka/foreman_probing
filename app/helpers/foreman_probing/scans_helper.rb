@@ -25,5 +25,18 @@ module ForemanProbing
       end
       return buttons
     end
+
+    def targeting_label(targeting)
+      case targeting
+      when ::ForemanProbing::Targeting::Search
+        "with search query '#{targeting.raw_targets}'"
+      when ::ForemanProbing::Targeting::Direct
+        "direct '#{targeting.raw_targets}'"
+      when ::ForemanProbing::Targeting::SubnetDiscovery
+        'subnet discovery'
+      when ::ForemanProbing::Targeting::Subnet
+        "subnet #{targeting.subnet.name}"
+      end
+    end
   end
 end

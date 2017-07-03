@@ -25,9 +25,19 @@ module ForemanProbing
       if @scan.nil?
         @scan = ForemanProbing::Scan.new
         @scan.targeting = targeting
+        @scan.target_kind = targeting.target_kind
         @scan.smart_proxy = proxy
         @scan.scan_type = probe
         @scan.raw_ports = ports
+
+        case targeting
+        when ::ForemanProbing::Targeting::Direct
+          @scan.direct = targeting.raw_targets
+        when ::ForemanProbing::Targeting::Subnet
+          @scan.subnet_id = targeting.raw_targets.to_i
+        when ::ForemanProbing::Targeting::Search
+          @scan.search_query = targeting.raw_targets
+        end
       end
       @scan
     end
@@ -50,11 +60,11 @@ module ForemanProbing
     def targeting_from_params(params)
       case params[:target_kind].downcase
       when 'direct'
-        ::ForemanProbing::Targeting::Direct.new(:raw_targets => params[:direct][:ip])
+        ::ForemanProbing::Targeting::Direct.new(:raw_targets => params[:direct])
       when 'subnet'
-        ::ForemanProbing::Targeting::Subnet.new(:raw_targets => params[:subnet][:id])
+        ::ForemanProbing::Targeting::Subnet.new(:raw_targets => params[:subnet_id])
       when 'host'
-        ::ForemanProbing::Targeting::Host.new(:raw_targets => params[:host][:search_query])
+        ::ForemanProbing::Targeting::Search.new(:raw_targets => params[:search_query])
       when 'proxy'
         ::ForemanProbing::Targeting::SubnetDiscovery.new
       end

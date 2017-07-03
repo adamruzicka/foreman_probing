@@ -9,7 +9,9 @@
     <h4>Details</h4>
     <b><%= _("Smart proxy") %></b>: <a href="<%= url_for(@scan.smart_proxy) %>"><%= @scan.smart_proxy.name %></a><br>
     <b><%= _("Scan type") %></b>: <%= @scan.scan_type %><br>
-    <b><%= _("Ports") %></b>: <%= @scan.ports.join(', ') %><br>
+    <% if @scan.scan_type != 'ICMP' %>
+        <b><%= _("Ports") %></b>: <%= @scan.ports.join(', ') %><br>
+    <% end %>
 </div>
 
 <div class="col-md-6 infoblock">
@@ -19,7 +21,7 @@
             <tr><th>Host</th><th>State</th></tr>
             <% @scan.hosts.each do |host| %>
                 <tr><td><a href="<%= url_for(host) %>"><%= host.name %></a></td>
-                    <td><%= host.probing_facet.status %></td>
+                    <td><%= host.probing_facet && host.probing_facet.status %></td>
                 </tr>
             <% end %>
         </table>
