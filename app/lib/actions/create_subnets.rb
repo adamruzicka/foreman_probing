@@ -1,7 +1,7 @@
 module Actions
   module ForemanProbing
     class CreateSubnets < Actions::EntryAction
-
+      middleware.use Actions::Middleware::KeepCurrentUser
       def run
         proxy = SmartProxy.find(input[:proxy_id])
         output[:subnet_ids] = []

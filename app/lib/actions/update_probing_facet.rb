@@ -2,11 +2,14 @@ module Actions
   module ForemanProbing
     class UpdateProbingFacet < Actions::EntryAction
 
+      middleware.use Actions::Middleware::KeepCurrentUser
+
       def run
-        if input.key? :host_id
-          host = Host.find(input[:host_id])
+        data = input[:parsed_scan]
+        if data.key? :host_id
+          host = Host.find(data[:host_id])
           host.probing_facet ||= ::ForemanProbing::ProbingFacet.new
-          host.probing_facet.status = input['facts'].fetch('status', {}).fetch('state', 'down')
+          host.probing_facet.status = data['facts'].fetch('status', {}).fetch('state', 'down')
 
           %w(tcp udp).each do |protocol|
             update_ports protocol, host.probing_facet
@@ -19,7 +22,7 @@ module Actions
       private
 
       def update_ports(protocol, facet)
-        protocol_base = input['facts'].fetch(:ports, {}).fetch(protocol, {})
+        protocol_base = input[:parsed_scan]['facts'].fetch(:ports, {}).fetch(protocol, {})
         up, down = protocol_base.partition { |number, value| value['state'] == 'open' }
                      .map { |part| part.map(&:first).map(&:to_i) }
         known = facet.scanned_ports.where(:protocol => protocol).pluck(:number)

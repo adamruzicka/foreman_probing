@@ -1,7 +1,7 @@
 module Actions
   module ForemanProbing
     class ProcessHost < Actions::EntryAction
-
+      middleware.use Actions::Middleware::KeepCurrentUser
       def plan(input)
         sequence do
           parsed_scan = plan_action(::Actions::ForemanProbing::ImportHostFacts,
@@ -9,7 +9,7 @@ module Actions
                                     :facts => input[:facts],
                                     :proxy_id => input[:proxy_id],
                                     :options => input[:options])
-          plan_action(::Actions::ForemanProbing::UpdateProbingFacet, parsed_scan.output)
+          plan_action(::Actions::ForemanProbing::UpdateProbingFacet, :parsed_scan => parsed_scan.output)
         end
       end
       

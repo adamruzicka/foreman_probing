@@ -2,8 +2,6 @@ module Actions
   module ForemanProbing
     class ProcessScan < Actions::ActionWithSubPlans
 
-      # def plan(scan, proxy_id, options = {})
-      #   plan_self(:scan => scan, :proxy_id => proxy_id, :options => options)
       def plan(*args)
         plan_self(*args)
       end

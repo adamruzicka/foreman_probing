@@ -1,7 +1,7 @@
 module Actions
   module ForemanProbing
     class ImportHostFacts < ::Dynflow::Action
-
+      middleware.use Actions::Middleware::KeepCurrentUser
       def run
         facts = input[:facts]
         # If we're not scanning an already existing host and it is down, we don't want to import it to Foreman

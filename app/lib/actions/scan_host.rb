@@ -1,6 +1,7 @@
 module Actions
   module ForemanProbing
     class ScanHost < Actions::EntryAction
+      middleware.use Actions::Middleware::KeepCurrentUser
       include ::Actions::Helpers::WithDelegatedAction
 
       middleware.do_not_use Dynflow::Middleware::Common::Transaction

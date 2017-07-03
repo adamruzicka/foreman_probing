@@ -5,8 +5,8 @@ module Actions
       include ::Actions::Helpers::WithDelegatedAction
 
       middleware.do_not_use Dynflow::Middleware::Common::Transaction
+      middleware.use Actions::Middleware::KeepCurrentUser
 
-      # def plan(proxy, targeting, scan_type, ports, options = {})
       def plan(scan, ports, options = {})
         options[:subnet_discovery] = true if scan.targeting.is_a? ::ForemanProbing::Targeting::SubnetDiscovery
         scanned = plan_delegated_action(scan.smart_proxy, 'ForemanProbingCore::Actions::UseProbe',
