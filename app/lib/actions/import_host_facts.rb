@@ -14,7 +14,8 @@ module Actions
             output[:facts] = facts
           end
           try_set_subnet!(host)
-          host.smart_proxy_ids << input[:proxy_id] unless input[:proxy_id].nil?
+          host.organization_id
+          host.smart_proxy_ids << input[:proxy_id]
           output[:host_id] = host.id
           output[:hostname] = host.name
           scan = ::ForemanProbing::Scan.find(input[:scan_id])
@@ -48,6 +49,8 @@ module Actions
                  else
                    Subnet.all.find { |subnet| subnet.ipaddr.include? host.ip } # Try to find a defined subnet
                  end
+        host.location_id = subnet.location_ids.first
+        host.organization_id = subnet.organization_ids.first
         host.subnet = subnet if subnet
       end
 

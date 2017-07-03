@@ -6,6 +6,7 @@ module ForemanProbing
 
     config.autoload_paths += Dir["#{config.root}/app/controllers/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/helpers"]
+    config.autoload_paths += Dir["#{config.root}/app/helpers/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/models/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/overrides"]
     config.autoload_paths += Dir["#{config.root}/app/services"]
@@ -31,12 +32,12 @@ module ForemanProbing
         # Add a new role called 'Discovery' if it doesn't exist
         # role 'ForemanProbing', [:view_foreman_probing]
 
-        # add menu entry
         menu :top_menu, :template,
-             url_hash: { controller: :'foreman_probing/scans', action: :new },
-             caption: _('Scan Network'),
-             parent: :hosts_menu,
-             after: :newhost
+             url_hash: { controller: :'foreman_probing/scans', action: :index },
+             caption: _('Network scans'),
+             parent: :monitor_menu,
+             after: :audits
+
 
         # add dashboard widget
         # widget 'foreman_probing_widget', name: N_('Foreman plugin template widget'), sizex: 4, sizey: 1
@@ -64,7 +65,7 @@ module ForemanProbing
       begin
         Host::Managed.send(:include, ForemanProbing::HostExtensions)
         ForemanTasks::Task.send(:include, ForemanProbing::ForemanTasksTaskExtensions)
-        # HostsHelper.send(:include, ForemanProbing::HostsHelperExtensions)
+        HostsHelper.send(:include, ForemanProbing::HostsHelperExtensions)
 
         ::FactImporter.register_fact_importer(
           :foreman_probing,
