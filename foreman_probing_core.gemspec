@@ -19,6 +19,6 @@ Gem::Specification.new do |s|
   # s.add_dependency 'deface'
   # s.add_development_dependency 'rubocop'
   # s.add_development_dependency 'rdoc'
-  s.add_dependency('foreman-tasks-core', '~> 0.1.0')
+  s.add_dependency('foreman-tasks-core', '~> 0.1')
   s.add_dependency('ruby-nmap', '~> 0.9')
 end
