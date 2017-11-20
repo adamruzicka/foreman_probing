@@ -1,10 +1,9 @@
-require 'open3'
-require 'nmap/xml'
+require 'ipaddr'
 
 module ForemanProbingCore
-  module Helpers
-    module NmapHelper
-      def nmap_probe
+  module Probes
+    class Nmap < Abstract
+      def probe!
         sudo_prefix = self.scan_type == 'udp' ? ['sudo'] : []
         command = [sudo_prefix, 'nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
         result = {}
@@ -24,7 +23,7 @@ module ForemanProbingCore
       end
 
       private
-
+      
       def hosts
         @hosts.map(&:to_s)
       end
@@ -38,8 +37,7 @@ module ForemanProbingCore
       end
 
       def nmap_ipv6_flag
-        # @hosts.first.ipv6? ? '-6' : ''
-        ''
+        @hosts.first.ipv6? ? '-6' : ''
       end
 
       # By default just return whatever is passed in
@@ -52,28 +50,28 @@ module ForemanProbingCore
         xml = ::Nmap::XML.parse(output)
         xml.hosts.map do |host|
           ports = host.ports.reduce({}) do |acc, port|
-            service = %w(confidence extra_info fingerprint hostname protocol product version).reduce({}) do |acc, key|
-              acc.merge(key => port.service.public_send(key.to_sym))
+            service = %w(confidence extra_info fingerprint hostname protocol product version).reduce({}) do |in_acc, key|
+              in_acc.merge(key => port.service.public_send(key.to_sym))
             end
             service[:ssl] = port.service.ssl?
             service[:method] = port.service.fingerprint_method
             record = {
-              port.number =>
-              {
-                :service => { port.service.name => service },
-                :state => port.state,
-                :reason => port.reason,
-                :scripts => port.scripts
-              }
-            }
+                      port.number =>
+                        {
+                         :service => { port.service.name => service },
+                         :state => port.state,
+                         :reason => port.reason,
+                         :scripts => port.scripts
+                        }
+                     }
             acc.merge(port.protocol => acc.fetch(port.protocol, {}).merge(record))
           end
           {
-            :_type     => :foreman_probing,
-            :addresses => factify_addresses(lookup_addresses(host.addresses.map(&:to_h))),
-            :hostnames => host.hostnames.map(&:to_h),
-            :ports     => ports,
-            :status    => host.status.to_h
+           :_type     => :foreman_probing,
+           :addresses => factify_addresses(lookup_addresses(host.addresses.map(&:to_h))),
+           :hostnames => host.hostnames.map(&:to_h),
+           :ports     => ports,
+           :status    => host.status.to_h
           }
         end
       end

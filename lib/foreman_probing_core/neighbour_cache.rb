@@ -1,6 +1,5 @@
 module ForemanProbingCore
   class NeighbourCache
-
     def initialize
       @cache = []
     end
