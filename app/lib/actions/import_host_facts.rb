@@ -49,9 +49,11 @@ module Actions
                  else
                    Subnet.all.find { |subnet| subnet.ipaddr.include? host.ip } # Try to find a defined subnet
                  end
-        host.location_id = subnet.location_ids.first
-        host.organization_id = subnet.organization_ids.first
-        host.subnet = subnet if subnet
+        if subnet
+          host.location_id = subnet.location_ids.first
+          host.organization_id = subnet.organization_ids.first
+          host.subnet = subnet
+        end
       end
 
       def determine_host(facts)
