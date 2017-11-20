@@ -11,6 +11,7 @@ module ForemanProbing
     config.autoload_paths += Dir["#{config.root}/app/overrides"]
     config.autoload_paths += Dir["#{config.root}/app/services"]
     config.autoload_paths += Dir["#{config.root}/app/lib/"]
+    config.autoload_paths += Dir["#{config.root}/app/lib/actions"]
 
 
     # Add any db migrations
@@ -102,6 +103,10 @@ module ForemanProbing
     initializer 'foreman_probing.require_dynflow', :before => 'foreman_tasks.initialize_dynflow' do |app|
       ForemanTasks.dynflow.require!
       ForemanTasks.dynflow.config.eager_load_paths << File.join(ForemanProbing::Engine.root, 'app/lib/actions')
+    end
+
+    initializer 'foreman_probing.register_paths' do |_app|
+      ForemanTasks.dynflow.config.eager_load_paths.concat(%W[#{ForemanProbing::Engine.root}/app/lib/actions}])
     end
   end
 
