@@ -14,5 +14,15 @@ Rails.application.routes.draw do
         end
       end
     end
+
+    namespace :api do
+      scope "(:apiv)", :module => :v2, :defaults => {:apiv => 'v2'}, :apiv => /v2/, :constraints => ApiConstraints.new(:version => 2, :default => true) do
+        resources :scans, :only => [:create, :index, :show] do
+          member do
+            get :rerun
+          end
+        end
+      end
+    end
   end
 end

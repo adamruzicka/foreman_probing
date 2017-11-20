@@ -3,6 +3,8 @@ module ForemanProbing
 
     attr_accessor :targeting, :ports, :probe, :proxy
 
+    TARGETING_TYPES = %w(direct subnet host proxy).freeze
+
     def self.new_from_params(params)
       self.new.tap do |c|
         c.targeting = c.targeting_from_params(params)
