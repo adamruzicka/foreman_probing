@@ -1,15 +1,17 @@
 require 'ipaddr'
+require 'open3'
+require 'nmap/xml'
 
 module ForemanProbingCore
   module Probes
     class Nmap < Abstract
       def probe!
-        sudo_prefix = self.scan_type == 'udp' ? ['sudo'] : []
+        sudo_prefix = self.class.scan_type == 'udp' ? ['sudo'] : []
         command = [sudo_prefix, 'nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
         result = {}
         status = nil
         puts "Executing: #{command.join(' ')}"
-        Open3.popen3(*command) do |_stdin, stdout, stderr, wait_thr|
+        ::Open3.popen3(*command) do |_stdin, stdout, stderr, wait_thr|
           wait_thr.join
           result[:out] = stdout.read
           result[:err] = stderr.read
@@ -37,7 +39,7 @@ module ForemanProbingCore
       end
 
       def nmap_ipv6_flag
-        @hosts.first.ipv6? ? '-6' : ''
+        IPAddr.new(@hosts.first).ipv6? ? '-6' : ''
       end
 
       # By default just return whatever is passed in

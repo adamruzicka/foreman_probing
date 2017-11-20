@@ -16,8 +16,6 @@ module ForemanProbingCore
   end
 
   def self.nmap_available?
-    # TODO:
-
     return @nmap_available unless @nmap_available.nil?
     `nmap`
     @nmap_available = true
@@ -26,9 +24,6 @@ module ForemanProbingCore
   end
 
   require 'foreman_probing_core/neighbour_cache'
-  require 'foreman_probing_core/helpers'
   require 'foreman_probing_core/probes'
-
   require 'foreman_probing_core/version'
-
 end
