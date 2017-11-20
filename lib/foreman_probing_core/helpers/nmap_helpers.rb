@@ -5,7 +5,8 @@ module ForemanProbingCore
   module Helpers
     module NmapHelper
       def nmap_probe
-        command = ['nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
+        sudo_prefix = self.scan_type == 'udp' ? ['sudo'] : []
+        command = [sudo_prefix, 'nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
         result = {}
         status = nil
         puts "Executing: #{command.join(' ')}"
