@@ -64,9 +64,9 @@ module ForemanProbing
     # Include concerns in this config.to_prepare block
     config.to_prepare do
       begin
-        Host::Managed.send(:include, ForemanProbing::HostExtensions)
-        ForemanTasks::Task.send(:include, ForemanProbing::ForemanTasksTaskExtensions)
-        HostsHelper.send(:include, ForemanProbing::HostsHelperExtensions)
+        Host::Managed.send(:prepend, ForemanProbing::HostExtensions)
+        ForemanTasks::Task.send(:prepend, ForemanProbing::ForemanTasksTaskExtensions)
+        HostsHelper.send(:prepend, ForemanProbing::HostsHelperExtensions)
 
         ::FactImporter.register_fact_importer(
           :foreman_probing,
