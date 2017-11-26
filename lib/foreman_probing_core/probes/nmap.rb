@@ -5,23 +5,15 @@ require 'nmap/xml'
 module ForemanProbingCore
   module Probes
     class Nmap < Abstract
-      def probe!
+      def command
         sudo_prefix = self.class.scan_type == 'udp' ? ['sudo'] : []
-        command = [sudo_prefix, 'nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
-        result = {}
-        status = nil
-        puts "Executing: #{command.join(' ')}"
-        ::Open3.popen3(*command) do |_stdin, stdout, stderr, wait_thr|
-          wait_thr.join
-          result[:out] = stdout.read
-          result[:err] = stderr.read
-          status = wait_thr.value
-        end
-        if status.success?
-          process_result(xml_to_hash(result[:out]))
-        else
-          raise result[:err]
-        end
+        [sudo_prefix, 'nmap', nmap_ipv6_flag, nmap_arguments, nmap_flags, hosts, with_ports(@ports)].flatten
+      end
+
+      # By default just return whatever is passed in
+      # Can be used as an extension point
+      def parse_result(xml)
+        xml_to_hash(xml)
       end
 
       private
@@ -40,12 +32,6 @@ module ForemanProbingCore
 
       def nmap_ipv6_flag
         IPAddr.new(@hosts.first).ipv6? ? '-6' : ''
-      end
-
-      # By default just return whatever is passed in
-      # Can be used as an extension point
-      def process_result(hash)
-        hash
       end
 
       def xml_to_hash(output)

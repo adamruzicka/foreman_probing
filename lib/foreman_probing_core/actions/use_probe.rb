@@ -1,27 +1,53 @@
-require 'foreman_tasks_core/shareable_action'
+require 'foreman_tasks_core/runner'
+require 'foreman_tasks_core/runner/command_runner'
 
 module ForemanProbingCore
   module Actions
-    class UseProbe < ForemanTasksCore::ShareableAction
+    class CommandRunner < ForemanTasksCore::Runner::CommandRunner
+      def initialize(*command)
+        super
+        @command = command
+      end
 
-      def plan(input)
+      def start
+        initialize_command(*@command)
+      end
+    end
+
+    class UseProbe < ForemanTasksCore::Runner::Action
+      def initiate_runner
         if input.fetch('options', {})['subnet_discovery']
           input['local_addresses'] = get_local_addrs
           input['targets'] = input['local_addresses'].keys
         end
-        super(input)
-      end
-
-      def run
-        probe = probe_class.new(input[:targets],
-                                input[:ports],
-                                input[:options])
         output[:targets] = input[:targets]
         output[:local_addresses] = input[:local_addresses] if input.key? :local_addresses
-        output[:facts] = probe.probe!
+        CommandRunner.new(*probe.command)
+      end
+
+      def finish_run(update)
+        super
+        output[:facts] = process_output(output[:result])
+        output.delete(:result)
       end
 
       private
+
+      def process_output(output)
+        stdout, stderr = output.partition { |out| out[:output_type] == 'stdout' }
+        if stderr.any?
+          raise stderr.map { |out| out[:output] }.join('')
+        else
+          output = stdout.map { |out| out[:output] }.join('')
+          probe.parse_result(output)
+        end
+      end
+
+      def probe
+        @probe ||= probe_class.new(input[:targets],
+                                   input[:ports],
+                                   input[:options])
+      end
 
       def probe_class
         case input[:scan_type].downcase
@@ -38,7 +64,7 @@ module ForemanProbingCore
 
       def get_local_addrs
         locals = Socket.getifaddrs.select { |ifaddr| ifaddr.addr && ifaddr.addr.ipv4_private? }
-        subnets = locals.reduce({}) do |acc, ifaddr|
+        locals.reduce({}) do |acc, ifaddr|
           # TODO: This is ugly
           cidr = 32 - ifaddr.netmask.ip_address.to_i.to_s(2).count('1')
 

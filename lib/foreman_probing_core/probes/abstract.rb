@@ -17,7 +17,11 @@ module ForemanProbingCore
         @options = options
       end
 
-      def probe!
+      def command
+        raise NotImplementedError
+      end
+
+      def parse_result(string)
         raise NotImplementedError
       end
     end
