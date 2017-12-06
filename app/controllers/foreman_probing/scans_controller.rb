@@ -7,8 +7,8 @@ module ForemanProbing
 
     def new
       @scan = ForemanProbing::Scan.new
-      @scan.target_kind = params[:target_kind] if params.key? :target_kind
-      @scan.search_query = params[:search_query] if params.key? :search_query
+      @scan.target_kind = params.fetch(:target_kind, 'direct')
+      @scan.search_query = params[:search_query]
       @scan.targeting = ::ForemanProbing::Targeting.new
     end
 
