@@ -1,5 +1,12 @@
 module ForemanProbing
   class Scan < ActiveRecord::Base
+    include Taxonomix
+
+    default_scope -> do
+      with_taxonomy_scope do
+        order(:id => 'desc')
+      end
+    end
 
     belongs_to :task, :class_name => '::ForemanTasks::Task'
     has_one :targeting
