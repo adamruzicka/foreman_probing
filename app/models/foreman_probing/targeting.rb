@@ -6,5 +6,7 @@ module ForemanProbing
     def targets
       raise NotImplementedError
     end
+
+    require_dependency(File.join(__FILE__.gsub(/\.rb$/, ''), '..', 'targeting', 'subnet.rb'))
   end
 end
