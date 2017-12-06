@@ -62,7 +62,7 @@ module Actions
           ifaces = ::Nic::Managed.where(:mac => macs)
           return ifaces.first.host unless ifaces.empty?
         end
-        Host::Managed.import_host(determine_hostname(facts).dup, :foreman_probing)
+        Host::Managed.import_host(determine_hostname(facts).dup)
       end
 
       def determine_hostname(facts)
