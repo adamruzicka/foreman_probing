@@ -13,6 +13,10 @@ module ForemanProbing
     config.autoload_paths += Dir["#{config.root}/app/lib/"]
     config.autoload_paths += Dir["#{config.root}/app/lib/actions"]
 
+    initializer 'foreman_probing.apipie' do
+      Apipie.configuration.api_controllers_matcher << "#{ForemanProbing::Engine.root}/app/controllers/foreman_probing/api/v2/*.rb"
+      Apipie.configuration.checksum_path += ['/foreman_probing/api/v2/']
+    end
 
     # Add any db migrations
     initializer 'foreman_probing.load_app_instance_data' do |app|

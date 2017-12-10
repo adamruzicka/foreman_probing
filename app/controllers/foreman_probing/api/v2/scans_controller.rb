@@ -24,11 +24,11 @@ module ForemanProbing
 
       api :POST, '/scans', N_('Create a scan')
       param :targeting_type, String, :required => true,
-        :desc => N_('Type of targeting, one of %') % ForemanProbing::ScanComposer::TARGETING_TYPES
-      param :scan_type, String, :required => true, :desc => N_('Type of the scan, one of %s') % %w{TCP UDP ICMP}
+        :desc => N_('Type of targeting, one of %{options}') % { :options => ForemanProbing::ScanComposer::TARGETING_TYPES.join(', ') }
+      param :scan_type, String, :required => true, :desc => N_('Type of the scan, one of %{options}') % { :options => %w{TCP UDP ICMP}.join(', ') }
       param :ports, String, :desc => N_('The ports to probe')
       param :proxy_id, :identifier, :required => true, :desc => N_('The smart proxy to run the scan from')
-      param :direct, String, :desc => N_('')
+      param :direct, String, :desc => N_('Comma separated list of IPv4 addresses, subnets or ranges')
       param :subnet_id, :identifier, :desc => N_('ID of subnet to scan')
       param :search_query, String, :desc => N_('Scan hosts matching the search query')
       def create
@@ -45,7 +45,7 @@ module ForemanProbing
       end
 
       api :POST, '/scans/:id', N_('Rerun scan')
-      param :id, :identifier, :required => true
+      param :id, :identifier, :required => true, :desc => N_('ID of scan to rerun')
       def rerun
         composer = ScanComposer.new_from_scan(ForemanProbing::Scan.find(params['id']))
         @scan = composer.compose!
@@ -59,7 +59,7 @@ module ForemanProbing
       end
 
       api :GET, '/scans/:id', N_('Show scan')
-      param :id, :identifier, :required => true
+      param :id, :identifier, :required => true, :desc => N_('ID of scan to show')
       def show; end
     end
   end
