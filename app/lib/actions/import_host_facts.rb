@@ -8,17 +8,19 @@ module Actions
         unless (input[:options][:host_id].nil? && facts.fetch(:status, {})[:state] == 'down')
           host = determine_host(facts)
           facts = try_match_interface_names(host, facts)
+          facts.delete(:hostnames)
           ::User.as :admin do
             state          = host.import_facts(facts)
             output[:state] = state
             output[:facts] = facts
           end
           try_set_subnet!(host)
-          host.organization_id
           host.smart_proxy_ids << input[:proxy_id]
           output[:host_id] = host.id
           output[:hostname] = host.name
           scan = ::ForemanProbing::Scan.find(input[:scan_id])
+          host.organization_id ||= scan.organization_ids.first
+          host.location_id ||= scan.location_ids.first
           host.scans << scan
           host.save!
         end
@@ -32,12 +34,14 @@ module Actions
       private
 
       def try_match_interface_names(host, facts)
-        return facts[:addresses][:ipv4].keys.count.times.map { |i| "unknown#{i}" } if host.nil?
         names = host.interfaces.where(:mac => facts.fetch(:addresses, {}).fetch(:hwaddr, {}).keys).map(&:identifier)
-        if names.count != facts[:addresses][:ipv4].keys
+        if names.count != facts[:addresses][:ipv4].keys.count
           names = facts[:addresses][:ipv4].keys.count.times.map { |i| "unknown#{i}" }
         end
-        facts[:addresses][:name] = names
+        names.each_with_index do |name, i|
+          ip = facts[:addresses][:ipv4].keys[i]
+          facts[:addresses][:ipv4][ip][:identifier] = name
+        end
         facts
       end
 
