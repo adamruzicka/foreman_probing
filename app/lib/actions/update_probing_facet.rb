@@ -19,6 +19,10 @@ module Actions
         end
       end
 
+      def rescue_strategy
+        Dynflow::Action::Rescue::Skip
+      end
+
       private
 
       def update_ports(protocol, facet)
