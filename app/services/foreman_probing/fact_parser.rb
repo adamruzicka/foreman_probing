@@ -21,17 +21,27 @@ module ForemanProbing
     def ipmi_interface; end
 
     def get_interfaces # rubocop:disable Style/AccessorMethodName
-      # count = [4,6].map { |i| facts['addresses'].fetch("ipv#{i}", {}).keys.count }.reduce(:+)
-      # (0..count - 1).map { |i| "unknown#{i}" }
-      facts['addresses']['name']
+      identifiers = facts['addresses'].values_at(*%w(ipv4 ipv6 hwaddr))
+        .compact.map do |hash|
+          hash.values.map { |value| value['identifier'] }
+        end
+      identifiers.flatten.compact.uniq
     end
 
     def get_facts_for_interface(interface)
-      index = facts['addresses']['name'].each_with_index.find { |name, _i| name == interface }.last
-      HashWithIndifferentAccess.new(:ipaddress  => facts['addresses'].fetch('ipv4', {}).keys.fetch(index, nil),
-                                    :ip6address => facts['addresses'].fetch('ipv6', {}).keys.fetch(index, nil),
-                                    :macaddress => facts['addresses'].fetch('hwaddr', {}).keys.fetch(index, nil))
+      addresses = facts['addresses']
+      result = { :ipaddress => 'ipv4',
+               :ip6address => 'ipv6',
+               :macaddress => 'hwaddr' }.reduce({}) do |acc, (key, kind)|
+        acc.merge(key => address_by_identifier(addresses, kind, interface))
+      end
+      HashWithIndifferentAccess.new(result)
     end
 
+    private
+
+    def address_by_identifier(addresses, kind, identifier)
+      addresses.fetch(kind, {}).find { |(_ip, value)| value['identifier'] == identifier }.try(:first)
+    end
   end
 end
