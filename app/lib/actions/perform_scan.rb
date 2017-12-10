@@ -14,7 +14,7 @@ module Actions
                                         :scan_type => scan.scan_type,
                                         :ports => ports,
                                         :options => options)
-        subnets = plan_action(CreateSubnets, :proxy_id => scan.smart_proxy_id, :scan => scanned.output) if scan.targeting.is_a? ::ForemanProbing::Targeting::SubnetDiscovery
+        plan_action(CreateSubnets, :proxy_id => scan.smart_proxy_id, :scan => scanned.output) if scan.targeting.is_a? ::ForemanProbing::Targeting::SubnetDiscovery
         plan_action(::Actions::ForemanProbing::ProcessScan,
                     :scan_id  => scan.id,
                     :scan     => scanned.output,

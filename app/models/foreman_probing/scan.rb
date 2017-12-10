@@ -11,7 +11,7 @@ module ForemanProbing
     belongs_to :task, :class_name => '::ForemanTasks::Task'
     has_one :targeting
     has_one :scan_host
-    has_many :hosts, :through => :scan_host
+    has_many :hosts, :through => :scan_host, :class_name => 'Host::Managed'
     belongs_to :smart_proxy
 
     attr_accessor :direct, :target_kind, :search_query, :subnet_id
