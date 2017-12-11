@@ -49,7 +49,6 @@ module Actions
         return unless host.subnet.nil? # We don't want to redefine already set subnet
         subnet = if input[:subnet_id]
                    Subnet.find(input[:subnet_id])
-                 # TODO: Add middle branch when scanning proxy's subnet
                  else
                    Subnet.all.find { |subnet| subnet.ipaddr.include? host.ip } # Try to find a defined subnet
                  end

@@ -1,0 +1,22 @@
+<%#
+kind: job_template
+name: Add Public Keys - SSH Default
+job_category: Commands
+description_format: "Add Public Key %{public key}"
+provider_type: SSH
+template_inputs:
+- name: public key
+description: Public key to add to the host
+input_type: user
+required: true
+%>
+PUBLIC_KEY="<%= input("public key") %>"
+SSH_DIR="${HOME}/.ssh"
+AUTHORIZED_KEYS="${SSH_DIR/authorized_keys"
+
+umask 077
+[ -d "$SSH_DIR" ] || mkdir -p "$SSH_DIR"
+
+if ! grep -q "$PUBLIC_KEY" "$SSH_DIR"; then
+  echo "$PUBLIC_KEY" >> "$AUTHORIZED_KEYS"
+fi

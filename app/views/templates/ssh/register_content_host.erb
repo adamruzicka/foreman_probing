@@ -1,0 +1,34 @@
+<%#
+kind: job_template
+name: Register Content Host - SSH Default
+job_category: Commands
+description_format: "Register Content Host using activation key %{activation key}"
+provider_type: SSH
+template_inputs:
+- name: activation key
+description: Name of the Activation Key to use for registering the host
+input_type: user
+required: true
+- name: organization name
+description: Name of the Organization to register the host to
+input_type: user
+required: true
+%>
+# Install Katello's certificates
+yum localinstall -y <%= foreman_server_url %>/pub/katello-ca-consumer-latest.noarch.rpm
+
+# Install subscription-manager
+yum install -y subscription-manager
+
+# Register the host
+subscription-manager register \
+  --org="<%= input("organization name") %> \
+  --activationkey="<%= input("activation key") %>
+
+# Enable repository with katello-agent
+yum install -y http://fedorapeople.org/groups/katello/releases/yum/3.4/client/el7/x86_64/katello-client-repos-latest.rpm
+
+# Install katello-agent
+yum -y install katello-agent
+systemctl enable goferd
+systemctl start goferd

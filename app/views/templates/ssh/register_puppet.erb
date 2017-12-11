@@ -1,0 +1,19 @@
+<%#
+kind: job_template
+name: Register Puppet - SSH Default
+job_category: Commands
+description_format: "Register Puppet"
+provider_type: SSH
+%>
+yum install -y https://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
+cat <<END > /etc/puppetlabs/puppet/puppet.conf
+[agent]
+server = <%= foreman_url %>
+ca_server = <%= foreman_url %>
+certname = <%= @host.certname %>
+END
+
+/opt/puppetlabs/puppet/bin/puppet agent --test
+
+systemctl enable puppet
+systemctl start puppet
