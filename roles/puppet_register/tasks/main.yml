@@ -3,10 +3,17 @@
   package:
     name: https://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
     state: installed
+
+- name: Enable epel
+  package:
+    name: epel-release
+    state: installed
+
 - name: Install puppet agent
   package:
     name: puppet-agent
     state: installed
+
 - name: Configure puppet agent
   ini_file:
     path: /etc/puppetlabs/puppet/puppet.conf
@@ -14,7 +21,12 @@
     option: {{ item.key }}
     value: {{ item.value }}
   with_dict:
-    server: {{ foreman_params['foreman_url'] }}
-    ca_server: {{ foreman_params['foreman_url'] }}
+    server: {{ foreman_server_fqdn}}
+    ca_server: {{ foreman_server_fqdn }}
     certname: {{ foreman_params['certname'] }}
 
+- name: Start and enable puppet service
+  service:
+    name: puppet
+    state: started
+    enable: yes
