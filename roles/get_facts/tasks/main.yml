@@ -1,0 +1,4 @@
+---
+- name: Do nothing
+  debug:
+    msg: "Running any playbook forces fact gathering"

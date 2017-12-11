@@ -1,0 +1,21 @@
+---
+- package:
+    name: "{{ foreman_params['foreman_url'] }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    state: installed
+- package:
+    name: subscription-manager
+    state: installed
+
+- command: subscription-manager register --org="{{ foreman['organization_name'] }}" --activationkey="{{ foreman_params['activation_key'] }}"
+
+- package:
+    name: http://fedorapeople.org/groups/katello/releases/yum/3.4/client/el7/x86_64/katello-client-repos-latest.rpm
+    state: installed
+
+- package:
+    name: katello-agent
+
+- service:
+    name: goferd
+    enabled: yes
+    state: started

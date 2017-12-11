@@ -75,6 +75,9 @@ END
 7. Use Remote Execution or Ansible to manage the hosts
 8. (optional) Use Remote Execution or Ansible to deploy agents (Puppet, Katello,
    Chef, Salt minion...)
+   
+## Ansible roles
+Some of the roles need `foreman_url` parameter to be set. It would be probably best to set this parameter as global and be done with it.
 
 ## Contributing
 

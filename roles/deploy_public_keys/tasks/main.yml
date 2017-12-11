@@ -1,0 +1,4 @@
+---
+- name: Install SSH public key
+  key: "{{ foreman_params['public_key'] }}"
+  user: "{{ foreman_params['remote_execution_ssh_user'] }}"

@@ -1,0 +1,20 @@
+---
+- name: Enable puppet repositories
+  package:
+    name: https://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
+    state: installed
+- name: Install puppet agent
+  package:
+    name: puppet-agent
+    state: installed
+- name: Configure puppet agent
+  ini_file:
+    path: /etc/puppetlabs/puppet/puppet.conf
+    section: agent
+    option: {{ item.key }}
+    value: {{ item.value }}
+  with_dict:
+    server: {{ foreman_params['foreman_url'] }}
+    ca_server: {{ foreman_params['foreman_url'] }}
+    certname: {{ foreman_params['certname'] }}
+
