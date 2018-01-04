@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
   s.name        = 'foreman_probing_core'
   s.version     = ForemanProbingCore::VERSION
   # s.date        = Time.zone.today
+  s.licenses    = ['GPL-3.0']
   s.date        = Time.now
   s.authors     = ['Adam Ruzicka']
   s.email       = ['aruzicka@redhat.com']
