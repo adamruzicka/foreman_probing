@@ -6,13 +6,13 @@ description_format: "Register Content Host using activation key %{activation key
 provider_type: SSH
 template_inputs:
 - name: activation key
-description: Name of the Activation Key to use for registering the host
-input_type: user
-required: true
+  description: Name of the Activation Key to use for registering the host
+  input_type: user
+  required: true
 - name: organization name
-description: Name of the Organization to register the host to
-input_type: user
-required: true
+  description: Name of the Organization to register the host to
+  input_type: user
+  required: true
 %>
 # Install Katello's certificates
 yum localinstall -y <%= foreman_server_url %>/pub/katello-ca-consumer-latest.noarch.rpm

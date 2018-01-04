@@ -6,9 +6,9 @@ description_format: "Add Public Key %{public key}"
 provider_type: SSH
 template_inputs:
 - name: public key
-description: Public key to add to the host
-input_type: user
-required: true
+  description: Public key to add to the host
+  input_type: user
+  required: true
 %>
 PUBLIC_KEY="<%= input("public key") %>"
 SSH_DIR="${HOME}/.ssh"
