@@ -39,8 +39,10 @@ module Actions
           names = facts[:addresses][:ipv4].keys.count.times.map { |i| "unknown#{i}" }
         end
         names.each_with_index do |name, i|
-          ip = facts[:addresses][:ipv4].keys[i]
-          facts[:addresses][:ipv4][ip][:identifier] = name
+          [:ipv4, :ipv6, :hwaddr].each do |kind|
+            addr = facts[:addresses].fetch(kind, {}).keys[i]
+            facts[:addresses].fetch(kind, {}).fetch(addr, {})[:identifier] = name
+          end
         end
         facts
       end
