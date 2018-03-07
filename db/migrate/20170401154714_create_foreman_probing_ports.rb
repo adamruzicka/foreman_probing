@@ -1,4 +1,4 @@
-class CreateForemanProbingPorts < ActiveRecord::Migration
+class CreateForemanProbingPorts < ActiveRecord::Migration[4.2]
   def change
     create_table :foreman_probing_ports do |t|
       t.integer :number
