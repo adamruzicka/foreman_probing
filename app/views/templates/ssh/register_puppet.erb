@@ -1,15 +1,19 @@
 <%#
-kind: job_template
 name: Register Puppet - SSH Default
 job_category: Commands
-description_format: "Register Puppet"
+description_format: Register Puppet
+snippet: false
 provider_type: SSH
+kind: job_template
 %>
+
 yum install -y https://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
+yum install -y puppet-agent
+
 cat <<END > /etc/puppetlabs/puppet/puppet.conf
 [agent]
-server = <%= foreman_url %>
-ca_server = <%= foreman_url %>
+server = <%= foreman_server_fqdn %>
+ca_server = <%= foreman_server_fqdn %>
 certname = <%= @host.certname %>
 END
 

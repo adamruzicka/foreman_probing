@@ -12,7 +12,7 @@ template_inputs:
 %>
 PUBLIC_KEY="<%= input("public key") %>"
 SSH_DIR="${HOME}/.ssh"
-AUTHORIZED_KEYS="${SSH_DIR/authorized_keys"
+AUTHORIZED_KEYS="${SSH_DIR}/authorized_keys"
 
 umask 077
 [ -d "$SSH_DIR" ] || mkdir -p "$SSH_DIR"
