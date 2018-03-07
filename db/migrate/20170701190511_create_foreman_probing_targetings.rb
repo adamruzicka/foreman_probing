@@ -1,4 +1,4 @@
-class CreateForemanProbingTargetings < ActiveRecord::Migration
+class CreateForemanProbingTargetings < ActiveRecord::Migration[4.2]
   def change
     create_table :foreman_probing_targetings do |t|
       t.string :type, index: true, null: false

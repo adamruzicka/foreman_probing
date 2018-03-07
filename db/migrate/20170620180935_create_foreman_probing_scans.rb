@@ -1,4 +1,4 @@
-class CreateForemanProbingScans < ActiveRecord::Migration
+class CreateForemanProbingScans < ActiveRecord::Migration[4.2]
   def change
     create_table :foreman_probing_scans do |t|
       t.belongs_to :smart_proxy, :index => true
