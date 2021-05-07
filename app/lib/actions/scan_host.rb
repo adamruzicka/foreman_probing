@@ -11,7 +11,7 @@ module Actions
 
         hostname = find_ip_or_hostname(host)
         proxy = proxy_selector.determine_proxy(host)
-        plan_delegated_action(proxy, 'ForemanProbingCore::Actions::UseProbe', hostname, probes, port_overrides)
+        plan_delegated_action(proxy, 'Proxy::Probing::Actions::UseProbe', hostname, probes, port_overrides)
         plan_self
       end
 

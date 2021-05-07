@@ -9,7 +9,7 @@ module Actions
 
       def plan(scan, ports, options = {})
         options[:subnet_discovery] = true if scan.targeting.is_a? ::ForemanProbing::Targeting::SubnetDiscovery
-        scanned = plan_delegated_action(scan.smart_proxy, 'ForemanProbingCore::Actions::UseProbe',
+        scanned = plan_delegated_action(scan.smart_proxy, 'Proxy::Probing::Actions::UseProbe',
                                         :targets => scan.targeting.targets,
                                         :scan_type => scan.scan_type,
                                         :ports => ports,
